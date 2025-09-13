@@ -48,13 +48,14 @@ class Island
         this.sceneryHue = this.hue + random.floatSign(.1,.2);
 
         const difficulty = percent(id, 0, islandCount-1);
-        this.waveRate1 = random.float(.35,.45) + difficulty * random.float(-.1,.1);
-        this.waveScale1 = random.float(1.5,2) + difficulty*random.float(-.5,.5);
+        this.waveRate1 = random.float(.35,.45) + difficulty * random.float(-.05,.05);
+        this.waveScale1 = random.float(1.5,2) + difficulty*random.float(-.2,.2);
         this.waveRate2 = difficulty * random.float(.1,.3);
-        this.waveScale2 = difficulty * random.float(1,2);
-        this.noiseScale = .5 + difficulty * random.float(1,2);
+        this.waveScale2 = difficulty * random.float(1,1.4);
+        this.noiseScale = .5 + difficulty * random.float(.5,1.5);
         this.noiseRate = .005 + difficulty * random.float(.02,.04);
         this.lineColor = hsl(this.hue + random.floatSign(.1,.3),.2,.2);
+        this.dunes = id%(islandCount-1) > 2 && random.float() < .4; // some sand dunes (not at start or end)
 
         const backgroundHue = this.hue + random.float(.2,.8); // not the same as main hue
         this.backgroundColorTop    = hsl(backgroundHue, random.float(.2,.5),.5);
@@ -101,15 +102,25 @@ function generateWorld()
         let y = minGroundHeight;
 
         // get island settings
-        const r1 = island.waveRate1;
-        const s1 = island.waveScale1;
-        const r2 = island.waveRate2;
-        const s2 = island.waveScale2;
+        const dunes = island.dunes;
+        const r1 = island.waveRate1/(dunes?2:1);
+        const s1 = island.waveScale1*(dunes?2:1);
+        const r2 = island.waveRate2/(dunes?2:1);
+        const s2 = island.waveScale2*(dunes?2:1);
+        let waveHeight =
+           s1*Math.sin(wavePos1 + i*r1/trackResolution) +
+           s2*Math.sin(wavePos2 + i*r2/trackResolution)
+        if (dunes)
+            waveHeight = -Math.abs(waveHeight); // make dunes
+        y += waveHeight + s1 + s2;
+
+        // apply noise
         const noiseScale = island.noiseScale;
         const noiseRate = island.noiseRate;
-        y += s1 + s1*Math.sin(wavePos1 + i*r1/trackResolution);
-        y += s2 + s2*Math.sin(wavePos2 + i*r2/trackResolution);
         y += noiseScale*noise1D(noisePos + i*noiseRate);
+
+        //y = minGroundHeight+(1- Math.abs(Math.sin(wavePos1 + i*r1/trackResolution)))*2;
+        //y= abs(y+22)-22
 
         // start ramp
         const startArea = 50;
@@ -200,7 +211,7 @@ function generateWorld()
         if (trackPoint.pickupType)
             continue; // already a pickup here
 
-        if (islandX < islandFadeIn+10 && !testPickups)
+        if (islandX < islandFadeIn+20 && !testPickups)
             continue; // start of new island
                 
         if (islandX > islandDistance-islandEndRamp)
@@ -229,12 +240,12 @@ function generateWorld()
         const slope = (trackPoint.y > track[i-1].y) - (track[i+1].y > trackPoint.y);
         if (slope < 0 && (i - lastPickup > 150 || testPickups))
         if (!trackPoint.pickupType) // not already a pickup here
-        if (random.float() < (firstIsland?.4:.7)  || extraPickups || testPickups) // chance of pickup
+        if (random.float() < (firstIsland?.5:.8)  || extraPickups || testPickups) // chance of pickup
         {
             // what type of pickup?
             if (!bubblePickups && // no boost on bubble island
                 !lastPickupWasBoost && // prevent 2 boosts in a row
-                (random.float() < .8 + finalIsland + badPickups) && // more boosts towards end of game
+                (random.float() < .8 + finalIsland) && // more boosts on final island
                 islandX < islandDistance-islandEndRamp-20) // dont put boosts near ramp
             {
                 // boost
@@ -419,7 +430,7 @@ function getGroundHeightI(i)
 {
     let ground = track[clamp(i|0,0,track.length-1)].y;
     if (i > (islandCount-1)*islandDistance*trackResolution)
-        ground += (Math.sin(i/19-time)+1)/3; // final island movement
+        ground += (Math.sin(i/19-time)+1)/2; // final island movement
     return ground;
 }
 

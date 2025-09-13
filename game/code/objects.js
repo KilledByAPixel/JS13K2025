@@ -23,8 +23,7 @@ class Pickup extends WorldObject
     {
         const size = vec2(type == 4 ? rand(1.3,1.5) : type == 1 ? 1 : rand(1,1.2));
         const tileInfo = spriteAtlas.circle;
-        const color = YELLOW;
-        super(pos, size, tileInfo, 0, color, 5);
+        super(pos, size, tileInfo, 0, WHITE, 5);
 
         this.type = type;
         this.gravityScale = 0;
@@ -72,19 +71,17 @@ class Pickup extends WorldObject
         {
             // create particles
             const good = this.type == 1;
-            const size = vec2(1)
             const angle = rand(9);
             const colorStart = hsl(0,0,good ? rand(.5,1) : 0);
             const colorEnd = hsl(0,0,good ? rand(.5,1):0,0);
-            const lifeTime = rand(.2,.5);
-            const sizeStart = rand(.1,.2);
+            const lifeTime = rand(.3,.5);
+            const sizeStart = rand(.2,.4);
             const sizeEnd = 0
             const additive = good;
             const pos = this.pos.add(vec2(0,this.height)).add(randInCircle(.7));
-            const p = new SimpleParticle(pos, size, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
-            p.gravityScale = -.2;
+            const p = new SimpleParticle(pos, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
+            p.gravityScale = -.3;
             p.velocity = randVector(.01);
-            p.renderOrder = 1e7;
         }
 
         super.update();
@@ -151,9 +148,9 @@ function drawCoinPickup(pos, size, color1=hsl(.65,1,.5), color2=hsl(.15,1,.7), a
 
 class SimpleParticle extends EngineObject
 {
-    constructor(position, size, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive)
+    constructor(position, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive)
     { 
-        super(position, size, 0, angle); 
+        super(position, vec2(), 0, angle); 
     
         this.colorStart = colorStart;
         this.colorEnd = colorEnd;
@@ -162,6 +159,7 @@ class SimpleParticle extends EngineObject
         this.sizeEnd = sizeEnd;
         this.additive = additive;
         this.fadeRate = .1;
+        this.renderOrder = additive ? 8 : 7;
     }
 
     render()

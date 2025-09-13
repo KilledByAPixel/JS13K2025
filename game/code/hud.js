@@ -309,11 +309,11 @@ function updateGameUI()
 function drawHUD()
 {
     const textSize = .1;
-    const textColorWave = hsl(1,1,1,wave(.5));
-    if (!quickStart && !testTitleScreen && !testStore)
+    const textColorWave = hsl(1,1,1,.5+Math.sin(time*3)/2);
+    if (!quickStart && !testTitleScreen && !testStore && !isJS13KBuild)
     {
         // intro transition, black circle around center
-        const p = time;
+        const p = gameTimer*2;
         const count = 99;
         for(let i=count; p<1 && i--;)
         {
@@ -352,23 +352,22 @@ function drawHUD()
     }
 
     if (paused)
-        drawTextShadow(`-Paused-`, vec2(.5, .94), textSize, WHITE);
-
+        drawTextShadow('Pawsed', vec2(.5, .94), textSize, WHITE);
     if (testAutoplay)
-        drawTextShadow(`-AUTOPLAY-`, vec2(.5, .95), .05, WHITE);
+        drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
     if (winTimer.isSet())
     {
-        drawTextShadow(`You Win!`, vec2(.5, .45), textSize, textColorWave);
+        drawTextShadow('You Win!', vec2(.5, .44), .15, textColorWave);
         if (lastWinTime)
         {
             const time = formatTimeString(lastWinTime);
-            drawTextShadow(time, vec2(.5, .55), textSize, textColorWave);
+            drawTextShadow(time, vec2(.5, .56), textSize, textColorWave);
         }
     }
     else if (gameOverTimer.isSet())
     {
-        drawTextShadow(`Game Over!`, vec2(.5, .5), textSize, textColorWave);
+        drawTextShadow('Game Over!', vec2(.5, .5), .15, textColorWave);
     }
     else
     {
@@ -388,7 +387,7 @@ function drawHUD()
         ASSERT(islandHold > islandFade*2);
 
         const islandTime = islandTimer.get();
-        if (islandTime < islandHold && !paused)
+        if (islandTime < islandHold)
         {
             const fade = 
                 islandTime < islandFade ? percent(islandTime, 0, islandFade) : 
@@ -397,7 +396,7 @@ function drawHUD()
 
             const c = hsl(1,1,1,fade);
             if (id) // dont show first island
-                drawTextShadow(`Island ` + (id+1), vec2(.5, .06), textSize, c);
+                drawTextShadow('Island ' + (id+1), vec2(.5, .06), textSize, c);
         }
     }
 }

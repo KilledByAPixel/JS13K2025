@@ -7,9 +7,20 @@ Features
 - Multiple game modes (classic, remix)
 - 13 Unlockable cats with different abilities
 - 13 levels in each world
+- Adaptive screen resolution
 
 How to play
 - Eat pizzas to get a boost
+- Collect flowers to unlock cats
+- Explore, who knows what you'll find!
+
+Controls
+- Space, Mouse, or Touch = Push Down
+- R = Restart
+- Escape = Back
+
+Made by Frank Force
+Dedicated to my cat Baldy, a black cat who always brought me good luck.
 
 */
 
@@ -27,7 +38,7 @@ if (debug)
     //testLevelView=1
     //testRandomize=1
     //testNoRamps=1;
-    //testAutoplay=1;
+   // testAutoplay=1;
     //testTitleScreen=1
     //testSeed = 90
     //testStore = 1;

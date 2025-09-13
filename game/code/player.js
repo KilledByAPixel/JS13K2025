@@ -10,6 +10,7 @@ class Player extends EngineObject
         //this.pos=vec2(450,-23);
         //this.pos.x = islandDistance*12.6
 
+        this.lastPosTail = vec2(); // must be before set cat
         this.setCatType(catType);
         this.renderOrder = 9;
         //this.velocity = vec2(.1,.1);
@@ -218,37 +219,37 @@ class Player extends EngineObject
             this.tailPoints[i] = vec2(-i*.01,0);
             this.tailVelocities[i] = vec2();
         }
-        // warm up tail
-        for(let i=99;i--;)
-            this.updateTail(i/99);
-    }
-
-    updateTail(t=time)
-    {
-        if (!this.tailLength)
-            return;
-
-        // wag tail
-        this.tailPoints[0].y = Math.sin(this.pos.x+t*3+this.catType)*.1-.05;
-
-        // update tail points
-        for (let i=1; i<this.tailPoints.length; i++)
-        {
-            const d = .01;
-            this.tailPoints[i] = this.tailPoints[i].add(this.tailVelocities[i]);
-            const deltaPos = this.tailPoints[i].subtract(this.tailPoints[i-1]);
-            this.tailPoints[i] = this.tailPoints[i-1].add(deltaPos.normalize(d));
-            this.tailVelocities[i] = this.tailVelocities[i]
-                .add(vec2(titleScreen?-noise1D(t+this.catType)*.02-.01:-.01,gravity))  // gravity 
-                .subtract(this.velocity)  // inertia
-                .add(deltaPos.scale(-3)) // spring force
-                .scale(.2); // damping
-        }
     }
 
     update()
     {
-        this.updateTail();
+        {
+            const t = time;
+            if (!this.tailLength)
+                return;
+
+            // wag tail
+            this.tailPoints[0].y = Math.sin(this.pos.x+t*3+this.catType)*.1-.05;
+
+            let velocity = this.pos.subtract(this.lastPosTail);
+            if (this.isMenuCat)
+                velocity = vec2(.02,0);
+            this.lastPosTail = this.pos.copy();
+
+            // update tail points
+            for (let i=1; i<this.tailPoints.length; i++)
+            {
+                const d = .01;
+                this.tailPoints[i] = this.tailPoints[i].add(this.tailVelocities[i]);
+                const deltaPos = this.tailPoints[i].subtract(this.tailPoints[i-1]);
+                this.tailPoints[i] = this.tailPoints[i-1].add(deltaPos.normalize(d));
+                this.tailVelocities[i] = this.tailVelocities[i]
+                    .add(vec2(titleScreen?-noise1D(t+this.catType)*.02-.01:-.01,gravity))  // gravity 
+                    .subtract(velocity)  // inertia
+                    .add(deltaPos.scale(-3)) // spring force
+                    .scale(.2); // damping
+            }
+        }
 
         if (this.meowTimer.elapsed())
         {
@@ -260,7 +261,7 @@ class Player extends EngineObject
         {
             // special update for menu cat
             // random blink
-            if (rand() < .004 && !this.blinkTimer.active())
+            if (rand() < .003 && !this.blinkTimer.active())
                 this.blinkTimer.set(.2);
                 
             // head animation
@@ -337,7 +338,7 @@ class Player extends EngineObject
         if (this.boostTimer.active() && (allowInput||testAutoplay) || endBoost)
         {
             // apply boost
-            this.velocity.x = max(this.velocity.x, .4);
+            this.velocity.x = max(this.velocity.x + .001, .4);
             if (endBoost)
                 this.velocity.y += .003;
             spawnParticles = 1;
@@ -353,7 +354,6 @@ class Player extends EngineObject
             // spawn particles
             for(let i=3; i--;)
             {
-                const size = vec2(1)
                 const angle = rand(9);
                 const evilParticles = this.catType == 12;
                 const rainbowParticles = this.catType == 10;
@@ -364,14 +364,14 @@ class Player extends EngineObject
                 const sizeEnd = rand(.1,.3);
                 const additive = !evilParticles;
                 const pos = this.pos.add(randInCircle(this.size.y/2))
-                const p = new SimpleParticle(pos, size, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
+                const p = new SimpleParticle(pos, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
                 p.gravityScale = .2;
                 p.velocity = randVector(.02);
             }
         }
 
         // clamp speed
-        const minSpeed = .05;
+        const minSpeed = .1;
         const maxSpeed = .6;
         const maxYSpeed = .6;
         this.velocity.x = clamp(this.velocity.x, minSpeed, maxSpeed);
@@ -442,7 +442,11 @@ class Player extends EngineObject
         }
 
         // clamp y position
-        this.pos.y = min(this.pos.y, maxHeight-playerSpaceAbove);
+        if (this.pos.y > maxHeight-playerSpaceAbove)
+        {
+            this.pos.y = maxHeight-playerSpaceAbove;
+            this.velocity.y = 0
+        }
         this.wasOnGround = isOnGround;
     }
 
@@ -574,7 +578,7 @@ class Player extends EngineObject
         else if (type == 3) // bad pickup, slow down
         {
             sound_gameOver.play(1,2);
-            this.velocity = vec2();
+            this.velocity.x -= .2;
         }
         else if (type == 4) // jump bubbles
         {

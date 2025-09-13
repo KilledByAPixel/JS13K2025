@@ -285,7 +285,7 @@ function engineInit()
 
     // init stuff and start engine
     inputInit();
-    audioInit();
+    //audioInit();
     debugInit();
     glInit();
 

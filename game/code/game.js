@@ -32,7 +32,7 @@ let gameOverTimer = new Timer;
 let winTimer = new Timer;
 let activeIslandID, boostIslandID;
 //let tripMode;
-let autoPause = !isTouchDevice; // auto pause when focus is lost
+let autoPause = !isTouchDevice && !debug; // auto pause when focus is lost
 let timeLeft;
 let colorBandTextureInfo;
 let parallaxTextureInfo;
@@ -91,9 +91,10 @@ function gameStart(isTitleScreen)
 
     world = new World;
     player = new Player(saveData.selectedCatType);
-    
+
     // fix camera still being in old place causing objects to despawn!
     updateCamera();
+    musicStart();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,6 +153,7 @@ function gameUpdate()
             sound_select.play();
             titleScreen = 0;
             gameMode = 0;
+            storeMode = 0;
             gameStart();
         }
         if (keyWasPressed('Escape'))
@@ -246,7 +248,7 @@ function gameUpdate()
                 else
                 {
                     islandTimer.set();
-                    timeLeft = min(timeLeft+22, 30);
+                    timeLeft = min(timeLeft+25, 30);
 
                     if (activeIslandID > 0)
                     {
@@ -405,8 +407,8 @@ function updateCamera()
     if (testLevelView)
     {
         cameraPos = vec2(mousePosScreen.x/mainCanvasSize.x*islandDistance*islandCount, 0);
-        cameraPos.x = .6*islandDistance*islandCount;
-        cameraScale = 4;
+        cameraPos.x = .2*islandDistance*islandCount;
+        cameraScale = 14;
     }
 }
 

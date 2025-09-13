@@ -11,17 +11,15 @@ const BUILD_FOLDER = 'build';
 const sourceFiles =
 [
     // LittleJS engine files
-    `../src/engineRelease.js`,
-    `../src/engineUtilities.js`,
-    `../src/engineSettings.js`,
-    `../src/engineObject.js`,
-    `../src/engineDraw.js`,
-    `../src/engineInput.js`,
-    `../src/engineAudio.js`,
-    `../src/engineParticles.js`,
-    `../src/engineMedals.js`,
-    `../src/engineWebGL.js`,
-    `../src/engine.js`,
+    `../engine/engineRelease.js`,
+    `../engine/engineUtilities.js`,
+    `../engine/engineSettings.js`,
+    `../engine/engineObject.js`,
+    `../engine/engineDraw.js`,
+    `../engine/engineInput.js`,
+    `../engine/engineAudio.js`,
+    `../engine/engineWebGL.js`,
+    `../engine/engine.js`,
 
     // game files
     'code/uiSystem.js',
