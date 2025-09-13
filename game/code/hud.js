@@ -88,7 +88,7 @@ function createUI()
         render()
         {
             // hack: make it slightly alpha
-            const color = hsl(0,0,0,this.lineColor.a = this.color.a = .5+this.mouseIsOver);
+            const color = hsl(0,0,0,this.lineColor.a = this.color.a = paused || storeMode ? 1 :.5+this.mouseIsOver);
             super.render();
             // hack must set alpha back
             this.lineColor.a = this.color.a = 1;
