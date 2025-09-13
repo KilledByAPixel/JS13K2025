@@ -3,16 +3,23 @@ Little Paws!
 
 Features
 - Procedurally generated terrain
+- 13 unlockable cats to play with
+- 13 islands in each game mode
 - Mouse, touch, or keyboard controls
-- Multiple game modes (classic, remix)
-- 13 Unlockable cats with different abilities
-- 13 levels in each world
-- Adaptive screen resolution
+- Parallex background effect
+- Time of day system
+- Classic Mode is always the same
+- Remix Mode is randomized, beat classic to unlock
+- Continue where you left off
+- Saves your coins to use anytime
+- Best times are save if you win without continuing
+- Adaptive screen resolution and aspect
 
 How to play
-- Eat pizzas to get a boost
-- Collect flowers to unlock cats
-- Explore, who knows what you'll find!
+- Press and hold to gain speed on down slopes
+- Release to gain speed on up slopes
+- Eat pizza to get a boost
+- Collect flowers to buy more cats
 
 Controls
 - Space, Mouse, or Touch = Push Down
@@ -20,7 +27,16 @@ Controls
 - Escape = Back
 
 Made by Frank Force
-Dedicated to my cat Baldy, a black cat who always brought me good luck.
+https://frankforce.com/
+
+Created with LittleJS Engine
+https://github.com/KilledByAPixel/LittleJS
+
+Donate Cryptocurrency to Help Homeless Pets!
+https://bestfriends.org/donate/cryptocurrency-donations
+
+This game is dedicated to my cat Baldy, 
+a black cat who always brought me good luck.
 
 */
 
@@ -38,7 +54,7 @@ if (debug)
     //testLevelView=1
     //testRandomize=1
     //testNoRamps=1;
-   // testAutoplay=1;
+   //testAutoplay=1;
     //testTitleScreen=1
     //testSeed = 90
     //testStore = 1;

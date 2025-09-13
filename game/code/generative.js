@@ -51,7 +51,7 @@ class Island
         this.waveRate1 = random.float(.35,.45) + difficulty * random.float(-.05,.05);
         this.waveScale1 = random.float(1.5,2) + difficulty*random.float(-.2,.2);
         this.waveRate2 = difficulty * random.float(.1,.3);
-        this.waveScale2 = difficulty * random.float(1,1.4);
+        this.waveScale2 = difficulty * random.float(.8,1.3);
         this.noiseScale = .5 + difficulty * random.float(.5,1.5);
         this.noiseRate = .005 + difficulty * random.float(.02,.04);
         this.lineColor = hsl(this.hue + random.floatSign(.1,.3),.2,.2);
@@ -430,7 +430,7 @@ function getGroundHeightI(i)
 {
     let ground = track[clamp(i|0,0,track.length-1)].y;
     if (i > (islandCount-1)*islandDistance*trackResolution)
-        ground += (Math.sin(i/19-time)+1)/2; // final island movement
+        ground += (Math.sin(i/19-time*2)+1)/2; // final island movement
     return ground;
 }
 
