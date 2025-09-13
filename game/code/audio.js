@@ -14,80 +14,56 @@ const sound_gameOver = new Sound([.6,,300,.01,.2,.7,,2,,,-30,.05,.07,,,.2,.3,,.1
 ///////////////////////////////////////////////////////////////////////////////
 // tiny tunes
 
-const drumKick = new Sound([2,,99,,,.05,,,,,,,,2]); // Loaded Sound 7789
-const drumHat = new Sound([.4,,1e3,,,.005,4]); // drumHat
-const piano = new Sound([.5,0,,,.1,.2,,2,,,,,.1,,,,,,,.2]); // Toy Piano
-//const bass = new Sound([1.6,0,110,,.1,.2,1,.5,,,,,,,,,.02,.5,.04,,-160]); // bass;
-const bass = new Sound([,0,55,,.1,,,.5]); // Toy Piano
-let beatTimer = new Timer;
-let beatCount;
-let pianoNote;
-let chordNote;
+const drumKick = new Sound([,,99,,,.02,,,,,,,,2]); // drumKick
+const drumHat = new Sound([,,1e3,,,.01,4,,,,,,,,,,,,,,4e3]); // drumHat
+const piano = new Sound([1,220.5,,,.1,,1,1.5,,,,,,,,,.1]); // piano
+const bass = new Sound([,0,55,,,,,.5,,,,,,,,,,.1,.05]); // bass
+let beatCount, bassNote, pianoNote, chordNote;
 
 function musicStart()
 {
-    beatCount = pianoNote = chordNote = 0;
+    beatCount = bassNote = pianoNote = chordNote = 0;
 }
 
 function musicUpdate()
 {
     if (!titleScreen)
         return;
-    if (beatTimer.active())
+    if (frame%8)
         return;
 
-    const pianoActive = 1;
-    const chordsActive = 1;
-    const drumsActive = 1;
-    const bassActive = 1;
-    const musicRate = .08;
-    const scale = [0,4,7,9,12]; // major pentatonic scale
+    const skipAhead = 0; // for debugging
+    const scale = [0,2,7,4,-3,-5]; // major pentatonic scale
 
-    if (drumsActive)
+    if (beatCount%32==0) // set new chord
     {
-        // precussion
-        if (beatCount%4==0 || !randInt(30))
-        {
-            // hat
-            drumHat.play(rand(.7,1));
-        }
-        if (beatCount%8==0 || beatCount%4==0 && !randInt(9))
-        {
-            // kick
-            drumKick.play(rand(.7,1));
-        }
+        bassNote = pianoNote = chordNote = beatCount%256 ? chordNote + randSign() : 0;
+        debug && console.log('chord',  chordNote, scale[mod(chordNote,  scale.length)]);
     }
+
+    // hat
+    if (beatCount%128 < 96 || skipAhead)
+    if (beatCount%2==0 || !randInt(9))
+        drumHat.play(((beatCount>>1)%4==2 ? .4:.2) - rand(.1));
+    
+    // kick
+    if (beatCount%4==0)
+        drumKick.play(((beatCount>>1)%4==0 ? .5:1) - rand(.2));
+    
+    // bass line
+    if (beatCount >= 32 || skipAhead)
+    if (beatCount%2==0 && (beatCount%8==0 || randInt(4)) || !randInt(9))
     {
-        // piano chords
-        if (beatCount%64==0) // set new chord
-            pianoNote = chordNote = beatCount%256 ? chordNote + randSign() : 0;
-        if (beatCount >= 32)
-        {
-            if (chordsActive)
-            if (beatCount%2==0)
-            {
-                // play the chord
-                const v = rand(.1,.2);
-                piano.playNote(scale[mod(chordNote,  scale.length)], v);
-                piano.playNote(scale[mod(chordNote+3,scale.length)], v);
-            }
-        }
+        const note = scale[mod(bassNote + randSign(), scale.length)];
+        bass.playNote(note, .7);
     }
-    if (beatCount >= 64)
+
+    // piano melody
+    if (beatCount%256 >= 64 || skipAhead)
+    if (beatCount%8==0 || beatCount%2 == 0 && randInt(2))
     {
-        if (pianoActive)
-        if (beatCount%4==0 && !randInt(9) || beatCount%2==0 && randInt(2))
-        {
-            const note = scale[mod(pianoNote += randSign(), scale.length)];
-            piano.playNote(note+7, rand(.5,1));
-        }
-        if (bassActive)
-        if (beatCount%4==0 || beatCount%2==0 && !randInt(9))
-        {
-            const note = scale[mod(chordNote, scale.length)];
-            bass.playNote(note, rand(.4,.7));
-        }
+        const note = scale[mod(pianoNote = randInt(9) ? pianoNote - 1 : randInt(9), scale.length)];
+        piano.playNote(note+12,.15);
     }
-    ++beatCount;
-    beatTimer.set(musicRate);
+    beatCount = ++beatCount;
 }

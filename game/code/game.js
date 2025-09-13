@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '0.5';
+const gameVersion = '1.1';
 
 debugShowErrors();
 
@@ -32,7 +32,7 @@ let gameOverTimer = new Timer;
 let winTimer = new Timer;
 let activeIslandID, boostIslandID;
 //let tripMode;
-let autoPause = !isTouchDevice && !debug; // auto pause when focus is lost
+let autoPause = !isTouchDevice; // auto pause when focus is lost
 let timeLeft;
 let colorBandTextureInfo;
 let parallaxTextureInfo;
@@ -88,6 +88,7 @@ function gameStart(isTitleScreen)
 
     // start in attract mode if title screen
     attractMode = titleScreen && !testTitleScreen && !testStore && !testAutoplay;
+    storeMode = 0;
 
     world = new World;
     player = new Player(saveData.selectedCatType);
@@ -145,16 +146,15 @@ function gameUpdate()
     if (titleScreen)
     {
         // update title screen
-        if (mouseWasPressed(0) || keyWasPressed('Space'))
+        if (mouseWasPressed(0))
             attractMode = 0;
         if (keyWasPressed('Space'))
         {
-            // start the game (get in without using the mouse)
-            sound_select.play();
-            titleScreen = 0;
-            gameMode = 0;
-            storeMode = 0;
-            gameStart();
+            // start game, continue if possible
+            if (saveData.lastMode < 0)
+                buttonClassic.onClick();
+            else
+                buttonContinue.onClick();
         }
         if (keyWasPressed('Escape'))
         {

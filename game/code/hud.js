@@ -63,6 +63,7 @@ function createUI()
         worldSeedContinue = saveData.lastSeed;
         gameStart();
         player.pos.x = saveData.lastIsland * islandDistance + 20;
+        boostIslandID = saveData.lastIsland;
         worldSeedContinue = 0;
     }
 
@@ -79,41 +80,42 @@ function createUI()
     {
         constructor(type)
         {
-            super(vec2(), buttonSizeSmall);
+            super();
             this.type = type;
-            this.cornerRadius = 40;
+            this.extraTouchSize = 200;
         }
 
         render()
         {
+            // hack: make it slightly alpha
+            const color = hsl(0,0,0,this.lineColor.a = this.color.a = .5+this.mouseIsOver);
             super.render();
+            // hack must set alpha back
+            this.lineColor.a = this.color.a = 1;
+
             if (this.type == 1)
             {
                 // pause
-                drawUIRect(this.pos.add(vec2( 16,0)), vec2(16,60), BLACK, 0, undefined, 0);
-                drawUIRect(this.pos.add(vec2(-16,0)), vec2(16,60), BLACK, 0, undefined, 0);
+                drawUIRect(this.pos.add(vec2( 16,0)), vec2(16,60), color, 0, undefined, 0);
+                drawUIRect(this.pos.add(vec2(-16,0)), vec2(16,60), color, 0, undefined, 0);
             }
             else
             {
                 // back arrow
                 const points = [vec2(-30,0), vec2(20,30), vec2(20,-30)];
-                drawUIPoints(this.pos, points, BLACK);
+                drawUIPoints(this.pos, points, color);
             }
         }
     }
     
-    const buttonSizeSmall = vec2(99);
     buttonBack = new UICornerButton;
     buttonBack.onClick = ()=>
     {
         sound_select.play(1, .5);
         if (storeMode)
-        {
             storeMode = 0;
-            return;
-        }
-
-        gameStart(1);
+        else
+            gameStart(1);
     }
 
     buttonPause = new UICornerButton(1);
@@ -239,7 +241,7 @@ function createStoreUI()
     storeButtons = [];
     for(let i=catCount; i--;)
     {
-        const j = i < 4 ? i : i>8 ? i+2 : i+1; // fix to make 13 fit nice
+        const j =i+2-(i<9) ; // shift over to make 13 fit
         const col = j%columns;
         const row = (j/columns)|0;
         const pos = vec2((col - (columns-1)/2)*buttonSize.x*1.15, 
@@ -256,16 +258,23 @@ function createStoreUI()
 
 function updateGameUI()
 {
-    const margin = 20
+    const largeCorner = isTouchDevice || titleScreen || paused;
+    const cornerMargin = largeCorner ? 40 : 20;
     const r = mainCanvasSize.y/uiNativeHeight;
+
+    const buttonSizeSmall = vec2(largeCorner ? 200 : 99);
+    buttonPause.size = buttonBack.size = buttonSizeSmall;
+    buttonPause.cornerRadius = buttonBack.cornerRadius = buttonSizeSmall.x/3;
     
-    // position corner buttons
-    buttonBack.visible = !titleScreen || storeMode; // only show back button in game
-    buttonBack.pos.x = (mainCanvasSize.x/2/r - buttonBack.size.x/2 - margin);
-    buttonPause.pos.y = buttonBack.pos.y = buttonBack.size.y/2 + margin;
+    // corner pause button
     buttonPause.visible = !titleScreen;
-    buttonPause.pos.x = buttonBack.pos.x - buttonBack.size.x - margin;
+    buttonPause.pos.x = (mainCanvasSize.x/2/r - buttonBack.size.x/2 - cornerMargin);
+    buttonPause.pos.y = buttonBack.pos.y = buttonBack.size.y/2 + cornerMargin;
     buttonPause.color = paused ? YELLOW : uiDefaultButtonColor;
+
+    // corner back button
+    buttonBack.visible = paused && !titleScreen || storeMode; // only show back button in game
+    buttonBack.pos.x = buttonBack.size.x/2 + cornerMargin-mainCanvasSize.x/2/r;
     
     // update menu visibility
     uiMenu.visible = titleScreen && !storeMode && !attractMode;
@@ -274,18 +283,6 @@ function updateGameUI()
 
     // update store
     uiStore.visible = storeMode;
-    /*
-    if (storeMode)
-    {
-        for(let i=catCount; i--;)
-        {
-            const b = storeButtons[i];
-            const owned = saveData.cats[b.catType];
-            b.disabled = saveData.coins < b.cost;
-            b.text = owned ? 'Owned' : `Cost: ${b.cost}`;
-            b.color = owned ? WHITE : uiDefaultButtonColor;
-        }
-    }*/
 
     // classic time
     const textOffset = vec2(0,-.25);

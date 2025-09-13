@@ -70,14 +70,13 @@ class Pickup extends WorldObject
         if (this.type == 1 || this.type == 3) // boost or bad pickup
         {
             // create particles
-            const good = this.type == 1;
             const angle = rand(9);
-            const colorStart = hsl(0,0,good ? rand(.5,1) : 0);
-            const colorEnd = hsl(0,0,good ? rand(.5,1):0,0);
+            const colorStart = hsl(0,0,rand(.5,1) );
+            const colorEnd = hsl(0,0,rand(.5,1),0);
             const lifeTime = rand(.3,.5);
             const sizeStart = rand(.2,.4);
             const sizeEnd = 0
-            const additive = good;
+            const additive = 1;
             const pos = this.pos.add(vec2(0,this.height)).add(randInCircle(.7));
             const p = new SimpleParticle(pos, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
             p.gravityScale = -.3;
@@ -102,13 +101,6 @@ class Pickup extends WorldObject
         }
         else if (this.type == 2) // coin
             drawCoinPickup(topPos, this.size, this.color1, this.color2, a);
-        else if (this.type == 3) // bad pickup, slow down
-        {
-            for(let i=5; i--;)
-                drawTile(topPos.add(vec2(.2).rotate(a+i/5*2*PI)), this.size, this.tileInfo, hsl(0,1,.5,.5));
-            for(let i=5; i--;)
-                drawRect(topPos.add(vec2(.1).rotate(a+i/5*2*PI)), vec2(.2,.5), BLACK, a+i/5*PI*2);
-        }
         else if (this.type == 4) // jump bubbles
         {
             for(let i=6; i--;)

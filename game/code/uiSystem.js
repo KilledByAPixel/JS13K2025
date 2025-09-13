@@ -144,6 +144,7 @@ class UIObject
         this.visible = true;
         this.children = [];
         this.parent = null;
+        this.extraTouchSize = 0;
         uiObjects.push(this);
     }
 
@@ -165,12 +166,13 @@ class UIObject
     {
         const mousePress = mouseWasPressed(0);
         const mouseDown = mouseIsDown(0);
-        if (!mouseDown || this.mouseIsHeld || mousePress)
+        if (mousePress || !mouseDown || this.mouseIsHeld)
         {
-            this.mouseIsOver = isMouseOverlappingUI(this.pos, this.size);
-            if (mousePress && this.mouseIsOver)
-                uiObjectWasClicked = 1; // prevent clicks from passing through UI
+            const size = this.size.add(vec2(isTouchDevice && this.extraTouchSize || 0));
+            this.mouseIsOver = isMouseOverlappingUI(this.pos, size);
         }
+        if (mousePress && this.mouseIsOver)
+            uiObjectWasClicked = 1; // prevent clicks from passing through UI
         if (this.mouseIsOver && !this.disabled)
         {
             if (mousePress)
@@ -181,9 +183,12 @@ class UIObject
             if (!mouseDown && this.mouseIsHeld)
                 this.onClick();
         }
-
         if (!mouseDown)
+        {
+            if (isTouchDevice)
+                this.mouseIsOver = 0;
             this.mouseIsHeld = 0;
+        }
     }
     render()
     {

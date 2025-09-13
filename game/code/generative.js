@@ -196,9 +196,8 @@ function generateWorld()
     }
 
     // set pickup locations
-    const bubbleIsland = random.int(6,10);// one island will have jump bubbles
-    const badPickupIsland = random.int(10,12);// one island will have bad pickups
-    const extraPickupIsland = random.int(3,6);// one island will have more pickups
+    const bubbleIsland = random.int(5,11);// one island will have jump bubbles
+    const extraPickupIsland = random.int(3,9);// one island will have more pickups
     let lastPickup = 0;
     let lastPickupWasBoost;
     for (let i=1; i<trackLength-1; i++)
@@ -226,7 +225,6 @@ function generateWorld()
         }
 
         const bubblePickups = island.id == bubbleIsland;
-        const badPickups = island.id == badPickupIsland;
         const extraPickups = island.id == extraPickupIsland;
         const firstIsland = !island.id;
         const finalIsland = island.id == islandCount-1;
@@ -249,7 +247,7 @@ function generateWorld()
                 islandX < islandDistance-islandEndRamp-20) // dont put boosts near ramp
             {
                 // boost
-                trackPoint.pickupType = badPickups && random.float() < .5 ? 3 : 1;
+                trackPoint.pickupType = 1;
                 lastPickup = i;
                 lastPickupWasBoost = 1;
             }

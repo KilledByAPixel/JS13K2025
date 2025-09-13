@@ -244,7 +244,7 @@ class Player extends EngineObject
                 const deltaPos = this.tailPoints[i].subtract(this.tailPoints[i-1]);
                 this.tailPoints[i] = this.tailPoints[i-1].add(deltaPos.normalize(d));
                 this.tailVelocities[i] = this.tailVelocities[i]
-                    .add(vec2(titleScreen?-noise1D(t+this.catType)*.02-.01:-.01,gravity))  // gravity 
+                    .add(vec2(-.01,gravity))  // gravity 
                     .subtract(velocity)  // inertia
                     .add(deltaPos.scale(-3)) // spring force
                     .scale(.2); // damping
@@ -265,7 +265,7 @@ class Player extends EngineObject
                 this.blinkTimer.set(.2);
                 
             // head animation
-            const headAngleTarget = Math.sin(this.pos.x*2)*.1;
+            const headAngleTarget = noise1D(time+this.catType*1e7)*.2-.1;
             this.headAngle = lerp(.1, this.headAngle, headAngleTarget);
             return;
         }
@@ -574,11 +574,6 @@ class Player extends EngineObject
             ++this.coinRunCount;
             ++saveData.coins;
             writeSaveData();
-        }
-        else if (type == 3) // bad pickup, slow down
-        {
-            sound_gameOver.play(1,2);
-            this.velocity.x -= .2;
         }
         else if (type == 4) // jump bubbles
         {
