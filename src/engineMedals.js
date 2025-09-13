@@ -132,9 +132,9 @@ class Medal
      */
     render(hidePercent=0)
     {
-        const context = overlayContext;
+        const context = mainContext;
         const width = min(medalDisplaySize.x, mainCanvas.width);
-        const x = overlayCanvas.width - width;
+        const x = mainCanvas.width - width;
         const y = -medalDisplaySize.y*hidePercent;
 
         // draw containing rect and clip to that region
@@ -165,7 +165,7 @@ class Medal
     {
         // draw the image or icon
         if (this.image)
-            overlayContext.drawImage(this.image, pos.x-size/2, pos.y-size/2, size, size);
+            mainContext.drawImage(this.image, pos.x-size/2, pos.y-size/2, size, size);
         else
             drawTextScreen(this.icon, pos, size*.7, new Color(0,0,0));
     }

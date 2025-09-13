@@ -49,11 +49,6 @@ const timeDelta = 1/frameRate;
  *  @memberof Engine */
 let engineObjects = [];
 
-/** Array with only objects set to collide with other objects this frame (for optimization)
- *  @type {Array}
- *  @memberof Engine */
-let engineObjectsCollide = [];
-
 /** Current update frame, used to calculate time
  *  @type {Number}
  *  @memberof Engine */
@@ -104,12 +99,6 @@ let frameTimeLastMS = 0, frameTimeBufferMS = 0, averageFPS = 0;
 
 /** Startup LittleJS engine with your callback functions
  *  @param {Function|function():Promise} gameInit - Called once after the engine starts up
- *  @param {Function} gameUpdate - Called every frame before objects are updated
- *  @param {Function} gameUpdatePost - Called after physics and objects are updated, even when paused
- *  @param {Function} gameRender - Called before objects are rendered, for drawing the background
- *  @param {Function} gameRenderPost - Called after objects are rendered, useful for drawing UI
- *  @param {Array} [imageSources=[]] - List of images to load
- *  @param {HTMLElement} [rootElement] - Root element to attach to, the document body by default
  *  @memberof Engine */
 function engineInit()
 {
@@ -123,8 +112,7 @@ function engineInit()
         mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
 
         // disable smoothing for pixel art
-        overlayContext.imageSmoothingEnabled = 
-            mainContext.imageSmoothingEnabled = !tilesPixelated;
+        mainContext.imageSmoothingEnabled = !tilesPixelated;
 
         // setup gl rendering if enabled
         glPreRender();
@@ -222,16 +210,16 @@ function engineInit()
             if (showWatermark)
             {
                 // update fps
-                overlayContext.textAlign = 'right';
-                overlayContext.textBaseline = 'top';
-                overlayContext.font = '1em monospace';
-                overlayContext.fillStyle = '#000';
+                mainContext.textAlign = 'right';
+                mainContext.textBaseline = 'top';
+                mainContext.font = '1em monospace';
+                mainContext.fillStyle = '#000';
                 const text = engineName + ' ' + 'v' + engineVersion + ' / ' 
                     + drawCount + ' / ' + engineObjects.length + ' / ' + averageFPS.toFixed(1)
                     + (glEnable ? ' GL' : ' 2D') ;
-                overlayContext.fillText(text, mainCanvas.width-3, 3);
-                overlayContext.fillStyle = '#fff';
-                overlayContext.fillText(text, mainCanvas.width-2, 2);
+                mainContext.fillText(text, mainCanvas.width-3, 3);
+                mainContext.fillStyle = '#fff';
+                mainContext.fillText(text, mainCanvas.width-2, 2);
                 drawCount = 0;
             }
         }
@@ -256,32 +244,23 @@ function engineInit()
             // fit to window by adding space on top or bottom if necessary
             const aspect = innerWidth / innerHeight;
             const fixedAspect = mainCanvas.width / mainCanvas.height;
-            glCanvas.style.width = mainCanvas.style.width = overlayCanvas.style.width  = aspect < fixedAspect ? '100%' : '';
-            glCanvas.style.height = mainCanvas.style.height = overlayCanvas.style.height = aspect < fixedAspect ? '' : '100%';
+            glCanvas.style.width = mainCanvas.style.width = aspect < fixedAspect ? '100%' : '';
+            glCanvas.style.height = mainCanvas.style.height = aspect < fixedAspect ? '' : '100%';
         }
         else
         {
             // clear canvas and set size to same as window
             mainCanvas.width  = min(innerWidth,  canvasMaxSize.x);
             mainCanvas.height = min(innerHeight, canvasMaxSize.y);
-        }   
-        
-        // clear overlay canvas and set size
-        //overlayCanvas.width  = mainCanvas.width;
-        //overlayCanvas.height = mainCanvas.height;
+        }
 
         // save canvas size
         mainCanvasSize = vec2(mainCanvas.width, mainCanvas.height);
     }
 
-    function startEngine()
-    {
-        new Promise((resolve) => resolve(gameInit())).then(engineUpdate);
-    }
-
     if (headlessMode)
     {
-        startEngine();
+        new Promise((resolve) => resolve(gameInit())).then(engineUpdate);
         return;
     }
 
@@ -310,17 +289,11 @@ function engineInit()
     debugInit();
     glInit();
 
-    // create overlay canvas for hud to appear above gl canvas
-    overlayCanvas = mainCanvas; // use main canvas as overlay
-    overlayContext = mainContext;
-    //rootElement.appendChild(overlayCanvas = document.createElement('canvas'));
-    //overlayContext = overlayCanvas.getContext('2d');
-
     // set canvas style
     const styleCanvas = 'position:absolute;'+ // allow canvases to overlap
         'top:50%;left:50%;transform:translate(-50%,-50%)'; // center on screen
-    glCanvas.style.cssText = mainCanvas.style.cssText = overlayCanvas.style.cssText = styleCanvas;
-    overlayCanvas.style.zIndex = 1; // overlay above main canvas
+    glCanvas.style.cssText = mainCanvas.style.cssText = styleCanvas;
+    mainCanvas.style.zIndex = 1; // overlay above gl canvas
     updateCanvas();
     
     if (isJS13KBuild)
@@ -329,27 +302,27 @@ function engineInit()
         const image = new Image;
         image.onload =()=> 
         {
-            textureInfos[0] = new TextureInfo(image);
-            startEngine();
+            textureInfoDefault = new TextureInfo(image);
+            gameInit();
+            engineUpdate();
         }
         image.src = imageSource;
     }
     else
     {
         // create promises for loading images
-        const promises = imageSources.map((src, textureIndex)=>
-            new Promise(resolve => 
+        const promises = [];
+        promises.push(new Promise(resolve => 
+        {
+            const image = new Image;
+            image.onerror = image.onload = ()=> 
             {
-                const image = new Image;
-                image.onerror = image.onload = ()=> 
-                {
-                    textureInfos[textureIndex] = new TextureInfo(image);
-                    resolve();
-                }
-                // image.crossOrigin = 'anonymous';
-                image.src = src;
-            })
-        );
+                textureInfoDefault = new TextureInfo(image);
+                resolve();
+            }
+            // image.crossOrigin = 'anonymous';
+            image.src = src;
+        }));
 
         if (showSplashScreen)
         {
@@ -377,9 +350,6 @@ function engineInit()
  *  @memberof Engine */
 function engineObjectsUpdate()
 {
-    // get list of solid objects for physics optimization
-    engineObjectsCollide = engineObjects.filter(o=>o.collideSolidObjects);
-
     // recursive object update
     function updateObject(o)
     {
@@ -477,9 +447,9 @@ function engineObjectsRaycast(start, end, objects=engineObjects)
 
 function drawEngineSplashScreen(t)
 {
-    const x = overlayContext;
-    const w = overlayCanvas.width = innerWidth;
-    const h = overlayCanvas.height = innerHeight;
+    const x = mainContext;
+    const w = mainCanvas.width = innerWidth;
+    const h = mainCanvas.height = innerHeight;
 
     {
         // background

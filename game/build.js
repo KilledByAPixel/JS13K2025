@@ -18,7 +18,6 @@ const sourceFiles =
     `../src/engineDraw.js`,
     `../src/engineInput.js`,
     `../src/engineAudio.js`,
-    `../src/engineTileLayer.js`,
     `../src/engineParticles.js`,
     `../src/engineMedals.js`,
     `../src/engineWebGL.js`,

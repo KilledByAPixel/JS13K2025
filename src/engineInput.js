@@ -78,20 +78,10 @@ let mousePos = vec2();
  *  @memberof Input */
 let mousePosScreen = vec2();
 
-/** Mouse wheel delta this frame
- *  @type {Number}
- *  @memberof Input */
-let mouseWheel = 0;
-
 /** Returns true if user is using gamepad (has more recently pressed a gamepad button)
  *  @type {Boolean}
  *  @memberof Input */
 let isUsingGamepad = false;
-
-/** Prevents input continuing to the default browser handling (false by default)
- *  @type {Boolean}
- *  @memberof Input */
-let preventDefaultInput = false;
 
 /** Returns true if gamepad button is down
  *  @param {Number} button
@@ -155,7 +145,6 @@ function inputUpdatePost()
     for (const deviceInputData of inputData)
     for (const i in deviceInputData)
         deviceInputData[i] &= 1;
-    mouseWheel = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +163,6 @@ function inputInit()
             if (inputWASDEmulateDirection)
                 inputData[0][remapKey(e.code)] = 3;
         }
-        preventDefaultInput && e.preventDefault();
     }
 
     onkeyup = (e)=>
@@ -208,7 +196,6 @@ function inputInit()
     }
     onmouseup     = (e)=> inputData[0][e.button] = inputData[0][e.button] & 2 | 4;
     onmousemove   = (e)=> mousePosScreen = mouseToScreen(e);
-    onwheel       = (e)=> mouseWheel = e.ctrlKey ? 0 : sign(e.deltaY);
     oncontextmenu = (e)=> false; // prevent right click menu
     onblur        = (e) => clearInput(); // reset input when focus is lost
 
@@ -220,8 +207,8 @@ function inputInit()
 // convert a mouse or touch event position to screen space
 function mouseToScreen(mousePos)
 {
-    if (!mainCanvas || headlessMode)
-        return vec2(); // fix bug that can occur if user clicks before page loads
+    if (headlessMode)
+        return vec2(); // todo: investigate old bug if user clicks before page loads
 
     const rect = mainCanvas.getBoundingClientRect();
     return vec2(mainCanvas.width, mainCanvas.height).multiply(
@@ -474,7 +461,7 @@ function touchGamepadRender()
         return;
 
     // setup the canvas
-    const context = overlayContext;
+    const context = mainContext;
     context.save();
     context.globalAlpha = alpha*touchGamepadAlpha;
     context.strokeStyle = '#fff';

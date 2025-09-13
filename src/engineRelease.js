@@ -7,7 +7,6 @@
 'use strict';
 
 const isJS13KBuild = 1; // special flag to make js13k smaller
-
 const showWatermark = 0;
 const debugKey = '';
 const debug = 0;

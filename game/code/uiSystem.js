@@ -18,7 +18,7 @@ const uiDefaultTextColor     = BLACK;
 const uiDefaultDisabledColor = hsl(0,0,.2);
 const uiDefaultButtonColor   = hsl(0,0,.8);
 const uiDefaultHoverColor    = WHITE;
-const uiDefaultLineWidth     = 4;
+const uiDefaultLineWidth     = 6;
 const uiDefaultFont          = fontDefault;
 
 // ui system
@@ -27,11 +27,11 @@ const uiNativeHeight = 1080;
 
 function uiUpdate()
 {
-    uiObjectWasClicked = 0;
-    overlayContext = mainContext;
+    uiObjectWasClicked = 0; // needed to prevent clickthrough
     function updateInvisible(o)
     {
-        o.mouseIsOver = o.mouseIsHeld = 0; // reset input state when not visible
+        // reset input state when not visible
+        o.mouseIsOver = o.mouseIsHeld = 0;
         for(const c of o.children)
             updateInvisible(c);
     }
@@ -55,10 +55,9 @@ function uiUpdate()
 function uiRender()
 {
     const s = mainCanvasSize.y / uiNativeHeight; // auto adjust height
-    overlayContext = mainContext;
-    overlayContext.save();
-    overlayContext.translate(mainCanvasSize.x/2,0);
-    overlayContext.scale(s,s);
+    mainContext.save();
+    mainContext.translate(mainCanvasSize.x/2,0);
+    mainContext.scale(s,s);
 
     function renderObject(o)
     {
@@ -71,49 +70,49 @@ function uiRender()
             renderObject(c);
     }
     uiObjects.forEach(o=> o.parent || renderObject(o));
-    overlayContext.restore();
+    mainContext.restore();
 }
 
 function drawUIRect(pos, size, color=uiDefaultColor, lineWidth=uiDefaultLineWidth, lineColor=uiDefaultLineColor, cornerRadius)
 {
-    overlayContext.fillStyle = color.toString();
-    overlayContext.beginPath();
-    if (cornerRadius && overlayContext.roundRect)
-        overlayContext.roundRect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
+    mainContext.fillStyle = color.toString();
+    mainContext.beginPath();
+    if (cornerRadius && mainContext.roundRect)
+        mainContext.roundRect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
     else
-        overlayContext.rect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y);
-    overlayContext.fill();
+        mainContext.rect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y);
+    mainContext.fill();
 
     if (lineWidth)
     {
-        overlayContext.strokeStyle = lineColor.toString();
-        overlayContext.lineWidth = lineWidth;
-        overlayContext.stroke();
+        mainContext.strokeStyle = lineColor.toString();
+        mainContext.lineWidth = lineWidth;
+        mainContext.stroke();
     }
 }
 
 function drawUIPoints(pos, points, color=uiDefaultColor)
 {
-    overlayContext.fillStyle = color.toString();
-    overlayContext.beginPath();
+    mainContext.fillStyle = color.toString();
+    mainContext.beginPath();
     for(const p of points)
-        overlayContext.lineTo(pos.x + p.x, pos.y + p.y);
-    overlayContext.fill();
+        mainContext.lineTo(pos.x + p.x, pos.y + p.y);
+    mainContext.fill();
 }
 
 function drawUILine(posA, posB, thickness=uiDefaultLineWidth, color=uiDefaultLineColor)
 {
-    overlayContext.strokeStyle = color.toString();
-    overlayContext.lineWidth = thickness;
-    overlayContext.beginPath();
-    overlayContext.lineTo(posA.x, posA.y);
-    overlayContext.lineTo(posB.x, posB.y);
-    overlayContext.stroke();
+    mainContext.strokeStyle = color.toString();
+    mainContext.lineWidth = thickness;
+    mainContext.beginPath();
+    mainContext.lineTo(posA.x, posA.y);
+    mainContext.lineTo(posB.x, posB.y);
+    mainContext.stroke();
 }
 
 function drawUIText(text, pos, size, color=uiDefaultColor, lineWidth=uiDefaultLineWidth, lineColor=uiDefaultLineColor, align='center', font=uiDefaultFont)
 {
-    drawTextScreen(text, pos, size.y, color, lineWidth, lineColor, align, font, size.x, overlayContext);
+    drawTextScreen(text, pos, size.y, color, lineWidth, lineColor, align, font, size.x, mainContext);
 }
 
 function isMouseOverlappingUI(posA, sizeA)

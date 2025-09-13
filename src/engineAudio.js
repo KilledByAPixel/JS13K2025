@@ -63,7 +63,6 @@ class Sound
             this.randomness = zzfxSound[1] != undefined ? zzfxSound[1] : defaultRandomness;
             zzfxSound[1] = 0; // generate without randomness
             this.sampleChannels = [zzfxG(...zzfxSound)];
-            this.sampleRate = zzfxR;
         }
     }
 
@@ -77,13 +76,11 @@ class Sound
     play(volume=1, pitch=1, randomnessScale=1, loop=false)
     {
         if (!soundEnable || headlessMode) return;
-        if (!this.sampleChannels) return;
+        ASSERT (this.sampleChannels);
 
         // play the sound
         const playbackRate = pitch + pitch * this.randomness*randomnessScale*rand(-1,1);
-        this.gainNode = audioContext.createGain();
-        this.source = playSamples(this.sampleChannels, volume, playbackRate, loop, this.sampleRate, this.gainNode);
-        return this.source;
+        playSamples(this.sampleChannels, volume, playbackRate, loop);
     }
 
     /** Set the sound volume of the most recently played instance of this sound
@@ -91,22 +88,10 @@ class Sound
      */
     setVolume(volume=1)
     {
-        if (this.gainNode)
-            this.gainNode.gain.value = volume;
+        ASSERT(1)
+        //if (this.gainNode)
+        //    this.gainNode.gain.value = volume;
     }
-
-    /** Stop the last instance of this sound that was played */
-    stop()
-    {
-        if (this.source)
-            this.source.stop();
-        this.source = undefined;
-    }
-    
-    /** Get source of most recent instance of this sound that was played
-     *  @return {AudioBufferSourceNode}
-     */
-    getSource() { return this.source; }
 
     /** Play the sound as a note with a semitone offset
      *  @param {Number}  semitoneOffset - How many semitones to offset pitch
@@ -120,7 +105,7 @@ class Sound
      *  @return {Number} - How long the sound is in seconds (undefined if loading)
      */
     getDuration() 
-    { return this.sampleChannels && this.sampleChannels[0].length / this.sampleRate; }
+    { return this.sampleChannels && this.sampleChannels[0].length / zzfxR; }
     
     /** Check if sound is loading, for sounds fetched from a url
      *  @return {Boolean} - True if sound is loading and not ready to play
@@ -159,22 +144,8 @@ class SoundWave extends Sound
             this.sampleChannels = [];
             for (let i = audioBuffer.numberOfChannels; i--;)
                 this.sampleChannels[i] = Array.from(audioBuffer.getChannelData(i));
-            this.sampleRate = audioBuffer.sampleRate;
         }).then(() => onloadCallback && onloadCallback(this));
     }
-}
-
-/** Play an mp3, ogg, or wav audio from a local file or url
- *  @param {String}  filename - Location of sound file to play
- *  @param {Number}  [volume] - How much to scale volume by
- *  @param {Boolean} [loop] - True if the music should loop
- *  @return {SoundWave} - The sound object for this file
- *  @memberof Audio */
-function playAudioFile(filename, volume=1, loop=false)
-{
-    if (!soundEnable || headlessMode) return;
-
-    return new SoundWave(filename,0,0,0, s=>s.play(undefined, volume, 1, 1, loop));
 }
 
 /**
@@ -219,7 +190,6 @@ class Music extends Sound
         if (!soundEnable || headlessMode) return;
         this.randomness = 0;
         this.sampleChannels = zzfxM(...zzfxMusic);
-        this.sampleRate = zzfxR;
     }
 
     /** Play the music
@@ -277,15 +247,14 @@ function getNoteFrequency(semitoneOffset, rootFrequency=220)
  *  @param {Number}   [volume] - How much to scale volume by
  *  @param {Number}   [rate] - The playback rate to use
  *  @param {Boolean}  [loop] - True if the sound should loop when it reaches the end
- *  @param {Number}   [sampleRate=44100] - Sample rate for the sound
- *  @param {GainNode} [gainNode] - Optional gain node for volume control while playing
  *  @return {AudioBufferSourceNode} - The audio node of the sound played
  *  @memberof Audio */
-function playSamples(sampleChannels, volume=1, rate=1, loop=false, sampleRate=zzfxR, gainNode) 
+function playSamples(sampleChannels, volume=1, rate=1, loop=false) 
 {
     if (!soundEnable || headlessMode) return;
 
     // create buffer and source
+    const sampleRate = zzfxR;
     const channelCount = sampleChannels.length;
     const sampleLength = sampleChannels[0].length;
     const buffer = audioContext.createBuffer(channelCount, sampleLength, sampleRate);
@@ -298,7 +267,7 @@ function playSamples(sampleChannels, volume=1, rate=1, loop=false, sampleRate=zz
     source.loop = loop;
 
     // create and connect gain node
-    gainNode = gainNode || audioContext.createGain();
+    const gainNode = audioContext.createGain();
     gainNode.gain.value = volume;
     gainNode.connect(audioGainNode);
 
@@ -309,7 +278,8 @@ function playSamples(sampleChannels, volume=1, rate=1, loop=false, sampleRate=zz
     if (audioContext.state != 'running')
     {
         // fix stalled audio and play
-        audioContext.resume().then(()=>source.start());
+        audioContext.resume()
+        //audioContext.resume().then(()=>source.start());
     }
     else
         source.start();
@@ -406,7 +376,8 @@ function zzfxG
         if (!(++c%(bitCrush*100|0)))                   // bit crush
         {
             s = shape? shape>1? shape>2? shape>3? shape>4?     // wave shape
-                ((t/PI2)%1 < shapeCurve+Math.sin(i/199)*.3 ? 1 : 0)*2-1 :           // 5 pulse (duty d)
+                ((t/PI2)%1 < .1+Math.sin(i/199)*.2? 1 : 0)*2-1 :           // 5 pulse (duty d)
+                //((t/PI2)%1 < shapeCurve+Math.sin(i/199)*.3 ? 1 : 0)*2-1 :           // 5 pulse (duty d)
                 Math.sin(t**3) :                       // 4 noise
                 clamp(Math.tan(t),1,-1):               // 3 tan
                 1-(2*t/PI2%2+2)%2:                     // 2 saw
@@ -416,7 +387,8 @@ function zzfxG
             s = (repeatTime ?
                     1 - tremolo + tremolo*Math.sin(PI2*i/repeatTime) // tremolo
                     : 1) *
-                (shape>4?s:sign(s)*(abs(s)**shapeCurve)) *           // curve
+                sign(s)*(abs(s)**shapeCurve) *           // curve
+                //(shape>4?s:sign(s)*(abs(s)**shapeCurve)) *           // curve
                 
                 (i < attack ? i/attack :                 // attack
                 i < attack + decay ?                     // decay

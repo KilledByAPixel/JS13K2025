@@ -20,19 +20,23 @@ class World extends EngineObject
         generateColorBandTexture();
         generateWorld();
         this.spawnAtmosphere(50); // warm up atmosphere
-        this.timeOfDay = 1; // start at day
+        this.timeOfDay = 1; // start of day
     }
 
     spawnAtmosphere(spawnCount=1)
     {
         // spawn atmosphere objects in front of camera
+        const hasWon = winTimer.isSet();
         for(let i=spawnCount; i--;)
         {
             const renderOrder = -10;
-            const o = new WorldObject(vec2(cameraPos.x+20, cameraPos.y+rand(-20,20)), vec2(rand(.2,.4),.1).scale(rand(.5,1)), 0, 0, hsl(0,0,1,rand(.1,.4)), renderOrder);
+            const color = hasWon ? hsl(rand(),1,.5,rand(.5,1)) : hsl(0,0,rand(.7,1),rand(.2,.5));
+            const velocity = vec2(-rand(.1,.2), rand(-.01,.01));
+            const angle = velocity.angle() + PI/2;
+            const o = new WorldObject(vec2(cameraPos.x+20, cameraPos.y+rand(-20,20)), vec2(rand(.2,.6),rand(.1,.2)).scale(rand(.5,1)), 0, angle, color, renderOrder);
             if (spawnCount > 1)
                 o.pos.x = cameraPos.x + rand(20); // warm up mode, spawn on screen
-            o.velocity = vec2(-rand(.1,.2), rand(-.02,.02));
+            o.velocity = velocity;
             o.gravityScale = 0;
         }
     }
@@ -43,7 +47,7 @@ class World extends EngineObject
         const realTimeOfDay = clamp(timeLeft/30);
         this.timeOfDay = lerp(.01, this.timeOfDay, realTimeOfDay);
         if (testMakeThumbnail)
-            this.timeOfDay = .8
+            this.timeOfDay = .8;
 
         // spawn pickups
         const w = getCameraSize().x/2+4;
@@ -88,7 +92,6 @@ class World extends EngineObject
                 }
             }
         }
-
         {
             // sun
             const timeOfDay = this.timeOfDay;
@@ -114,7 +117,7 @@ class World extends EngineObject
             const bleed = 2; // to fix seams
             const parallaxMaxScale = .3;
             const parallaxHeight = parallaxTextureSize/parallaxTextureLayers;
-            const tileInfo = new TileInfo(vec2(),vec2(parallaxTextureSize));
+            glSetTexture(parallaxTextureInfo.glTexture);
             for(let i=2; i--;)
             {
                 // draw 2 nearest islands only
@@ -131,12 +134,11 @@ class World extends EngineObject
                 for(let k=maxK; k--;)
                 {
                     // draw each parallax layer
-                    const p = (j+k/maxK)/(parallaxTextureLayers-1);
+                    const p = (j+1-k/maxK)/parallaxTextureLayers;
                     const parallaxPercent = lerp(p,parallaxPercentMax,parallaxPercentMin);
                     const color = hsl(island.hue + random.float(-.15,.15), 
-                        .5+p*.5,
+                        .5+p/2,
                         random.float(.7,.9)-p*.1);
-
                     const kp = k/(maxK-1);
                     const layerOffset = lerp(kp,-1.9,1.9) +  
                         +(id||k?random.float(-.1,.1):-.3); // ensure start of island has background
@@ -146,9 +148,9 @@ class World extends EngineObject
                     const textureIndex = random.int(parallaxTextureLayers);
                     const flip = random.sign();
                     const t = textureIndex*parallaxHeight;
-                    tileInfo.pos.y = t+bleed;
-                    tileInfo.size.y = parallaxHeight-bleed*2;
-                    drawParallaxTile(x, y, flip * sx, sy, tileInfo, color);
+                    parallaxTileInfo.pos.y = t+bleed;
+                    parallaxTileInfo.size.y = parallaxHeight-bleed*2;
+                    drawParallaxTile(x, y, flip * sx, sy, parallaxTileInfo, color);
                 }
             }
         }
@@ -197,22 +199,23 @@ class World extends EngineObject
     renderForeground()
     {
         // clouds
-        const maxWindow = 100;
+        const maxWindow = 99;
         const random = new RandomGenerator(worldSeed);
-        for(let i=500; --i;)
+        for(let i=400; --i;)
         {
             // for each puff
             const speed = random.float(1,2);
             const ox = mod(random.float(maxWindow)-time*speed,maxWindow)-maxWindow/2;
-            const p = vec2(player.pos.x+ox,maxHeight-Math.sin(i**3+time/9)**3-2);
-            drawTile(p, vec2(1,.5).scale(random.float(1,4)), spriteAtlas.circle, hsl(0,0,random.float(.7,1),random.float(.3,.6)), 0);
+            const p = vec2(player.pos.x+ox,maxHeight-Math.sin(i**3+time/9)**3-1);
+            const b = random.float(.7,1)
+            drawTile(p, vec2(1,.5).scale(random.float(1,4)), spriteAtlas.circle, rgb(b,b,b,random.float(.3,.5)), 0);
         }
     }
 
     render()
     {
         // scenery
-        const w=getCameraSize().x/2;
+        const w = getCameraSize().x/2;
         for(let i=cameraPos.x-w-4|0; i<cameraPos.x+w+4; ++i)
         {
             const random = new RandomGenerator(worldSeed+i**3%1e7);
@@ -231,8 +234,7 @@ class World extends EngineObject
                 const n = getGroundNormal(x);
                 const size = random.float(.5,1);
                 let angle = n.angle();
-
-                const hue = island.sceneryHue + random.float(-.1,.1)-tripMode*time/7;
+                const hue = island.sceneryHue + random.float(-.1,.1);//-tripMode*time/7;
                 const color1 = hsl(hue,random.float(.5,.8),random.float(.3,.5));
                 const color2 = GRAY;
                 const type = island.sceneryType;
@@ -240,7 +242,7 @@ class World extends EngineObject
                 if (type == 0) // bush
                 {
                     angle += random.float(-.3,.3); // rotate a bit
-                    const s = vec2(1.5,2);
+                    const s = vec2(2,2.5);
                     const p = pos.add(vec2(0,size*.6).rotate(angle));
                     drawTile(p, s.scale(size),    spriteAtlas.circle, color2, angle);
                     drawTile(p, s.scale(size-.1), spriteAtlas.circle, color1, angle);
@@ -269,25 +271,25 @@ class World extends EngineObject
                 else if (type == 4) // tree
                 {
                     angle += random.float(-.3,.3);  // rotate a bit
-                    const s = vec2(1.5);
-                    const p = pos.add(vec2(0,size/.7).rotate(angle));
+                    const s = vec2(2);
+                    const p = pos.add(vec2(0,size*2).rotate(angle));
                     drawTile(p, s.scale(size),    spriteAtlas.circle, color2, angle);
                     drawTile(p, s.scale(size-.1), spriteAtlas.circle, color1, angle);
-                    drawTile(pos, vec2(.2,2).scale(size), 0, color1, angle);
+                    drawTile(pos, vec2(.2,4).scale(size), 0, color1, angle);
                 }
             }
         }
         
         const drawStep = isTouchDevice ? .1 : .05; // less draw calls on mobile
         const sideDrawExtra = .5; // draw extra on sides
-        const xStart = cameraPos.x-w-sideDrawExtra;
-        const xEnd = cameraPos.x+w+sideDrawExtra;
+        const xStart = cameraPos.x - w - sideDrawExtra;
+        const xEnd = cameraPos.x + w + sideDrawExtra;
         
         {
             // hills background
-            const hillsTexture = new TileInfo(vec2(),vec2(.1));
             const height = 20; // how tall to draw hills to cover bottom of screen
             const sx = drawStep+.05, sy = height;
+            glSetTexture(colorBandTextureInfo.glTexture);
             for(let i=xStart/drawStep|0; i<xEnd/drawStep; ++i)
             {
                 const x = i * drawStep;
@@ -295,18 +297,18 @@ class World extends EngineObject
                 const island = getIsland(x);
 
                 // colored texture
-                hillsTexture.pos.x = island.textureHue;
-                hillsTexture.pos.y = x*island.hueTextureSlide*island.hillWrapCount;
-                hillsTexture.size.y = generativeTextureSize*island.hillWrapCount;
-                drawColorBandTile(x, h-height/2, sx, sy, hillsTexture);
+                colorBandTileInfo.pos.x = island.textureHue;
+                colorBandTileInfo.pos.y = x*island.hueTextureSlide*island.hillWrapCount;
+                colorBandTileInfo.size.y = generativeTextureSize*island.hillWrapCount;
+                drawColorBandTile(x, h-height/2, sx, sy, colorBandTileInfo);
                 //drawTile(vec2(x,h-e/2), vec2(drawStep+.05,e));
 
                 // shading
                 const yOffset = -1;
-                hillsTexture.pos.x = 0.5;
-                hillsTexture.pos.y = 1;
-                hillsTexture.size.y = generativeTextureSize-1;
-                drawColorBandTile(x, h-height/2 + yOffset, sx, sy, hillsTexture);
+                colorBandTileInfo.pos.x = 0.5;
+                colorBandTileInfo.pos.y = 1;
+                colorBandTileInfo.size.y = generativeTextureSize-1;
+                drawColorBandTile(x, h-height/2 + yOffset, sx, sy, colorBandTileInfo);
             }
         }
         {
@@ -332,7 +334,6 @@ class World extends EngineObject
             // hills outline
             const outlineStep = isTouchDevice ? .4 : .1; // less draw calls on mobile
             const width = .2;
-            //const color = hsl(.3,.2,.2);
             let p = vec2(), s = vec2(width);
             for(let i=xStart/outlineStep|0; i<xEnd/outlineStep; ++i)
             {
@@ -369,7 +370,6 @@ function drawParallaxTile(x, y, sx, sy, tileInfo, color)
     const v = tileInfo.pos.y * sizeInverse.y;
     const w = tileInfo.size.x * sizeInverse.x;
     const h = tileInfo.size.y * sizeInverse.y;
-    glSetTexture(parallaxTextureInfo.glTexture);
     glDraw(x, y, sx, sy, 0, u, v, u+w, v+h, color.rgbaInt());
 }
 
@@ -381,6 +381,5 @@ function drawColorBandTile(x, y, sx, sy, tileInfo)
     const v = tileInfo.pos.y * sizeInverse.y;
     const w = tileInfo.size.x * sizeInverse.x;
     const h = tileInfo.size.y * sizeInverse.y;
-    glSetTexture(colorBandTextureInfo.glTexture);
-    glDraw(x, y, sx, sy, 0, u, v, u+w, v+h, -1);
+    glDraw(x, y, sx, sy, 0, u, v, u+w, v+h);
 }

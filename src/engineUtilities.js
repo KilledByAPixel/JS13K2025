@@ -91,7 +91,7 @@ function distanceWrap(valueA, valueB, wrapSize=1)
  *  @returns {Number}
  *  @memberof Utilities */
 function lerpWrap(percent, valueA, valueB, wrapSize=1)
-{ return valueB + clamp(percent) * distanceWrap(valueA, valueB, wrapSize); }
+{ return valueA + clamp(percent) * distanceWrap(valueB, valueA, wrapSize); }
 
 /** Returns signed wrapped distance between the two angles passed in
  *  @param {Number} angleA
@@ -274,6 +274,12 @@ class RandomGenerator
         this.seed ^= this.seed << 5;
         return valueB + (valueA - valueB) * ((this.seed >>> 0) / 2**32);
     }
+
+    /** Returns a seeded random value between the two values passed in with random sign
+    *  @param {Number} [valueA]
+    *  @param {Number} [valueB]
+    *  @return {Number} */
+    floatSign(valueA=1, valueB=0) { return this.float(valueA, valueB) * this.sign(); }
 
     /** Returns a floored seeded random value the two values passed in
     *  @param {Number} valueA

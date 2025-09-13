@@ -7,7 +7,7 @@ class Player extends EngineObject
     constructor(catType=0, isMenuCat)
     {
         super();
-        //this.pos=vec2(510,-50);
+        //this.pos=vec2(450,-23);
         //this.pos.x = islandDistance*12.6
 
         this.setCatType(catType);
@@ -19,6 +19,7 @@ class Player extends EngineObject
         this.legModePercent = 
         this.headAngle = 
         this.wasOnGround = 
+        this.wasPushingDown = 
         this.coinRunCount = 0;
         this.airTimer = new Timer;
         this.blinkTimer = new Timer;
@@ -29,6 +30,7 @@ class Player extends EngineObject
         this.coinRunTimer = new Timer;
         this.endBoostTimer = new Timer;
         this.bubbleTimer = new Timer;
+        this.jumpTimer = new Timer;
         this.isMenuCat = isMenuCat;
         this.meowCount = 0;
         
@@ -52,9 +54,9 @@ class Player extends EngineObject
         this.catType = type;
 
         // default appearance
-        this.color = BLACK; // body
-        this.color2 = BLACK; // les
-        this.color3 = RED; // collar
+        this.color = BLACK;  // body
+        this.color2 = BLACK; // legs
+        this.color3 = RED;   // collar
         this.colorEye = YELLOW;
         this.eyeType = 0;
         this.tailLength = 70;
@@ -64,9 +66,10 @@ class Player extends EngineObject
         this.noseColor = hsl(0,1,.7); // pink
         this.noseScale = 1;
 
-        const random = new RandomGenerator(13*type*type*1e3);
+        const random = new RandomGenerator((type+99)*3e3);
         this.meowPitch = random.float(.7,1.3);
         this.meowVolume = random.float(.8,1.1);
+        this.size = vec2(this.drawPosScale = random.float(.8,1.1));
 
         if (type == 0)
         {
@@ -88,6 +91,7 @@ class Player extends EngineObject
             this.color3 = hsl(0,0,0,0);
             this.colorEye = YELLOW;
             this.hasStripes = 1;
+            this.size = vec2(this.drawPosScale = .75);
         }
         else if (type == 3)
         {
@@ -153,6 +157,8 @@ class Player extends EngineObject
             this.colorEye = WHITE;
             this.eyeType = 2;
             this.hasStripes = 1;
+            this.drawPosScale = 1;
+            this.size = vec2(1.2);
         }
         else if (type == 9)
         {
@@ -203,6 +209,7 @@ class Player extends EngineObject
             this.tailWidth = .25;
             this.meowPitch = .6;
         }
+
         // create tail
         this.tailPoints = [];
         this.tailVelocities = [];
@@ -233,8 +240,8 @@ class Player extends EngineObject
             this.tailPoints[i] = this.tailPoints[i-1].add(deltaPos.normalize(d));
             this.tailVelocities[i] = this.tailVelocities[i]
                 .add(vec2(titleScreen?-noise1D(t+this.catType)*.02-.01:-.01,gravity))  // gravity 
-                .subtract(this.velocity.scale(1))  // inertia
-                .add( deltaPos.scale(-3)) // spring force
+                .subtract(this.velocity)  // inertia
+                .add(deltaPos.scale(-3)) // spring force
                 .scale(.2); // damping
         }
     }
@@ -262,7 +269,9 @@ class Player extends EngineObject
             return;
         }
 
-        const h = getGroundHeight(this.pos.x)+.5;
+        super.update();
+
+        const h = getGroundHeight(this.pos.x) + this.size.y/2;
         const n = getGroundNormal(this.pos.x);
         const heightAboveGround = this.pos.y - h;
         const isOnGround = heightAboveGround < 0;
@@ -270,8 +279,8 @@ class Player extends EngineObject
         const hasWon = winTimer.isSet();
         const endBoost = this.endBoostTimer.active();
         const allowInput = !titleScreen && !gameOver && !hasWon && !endBoost && !testAutoplay;
-        let isPushingDown = (mouseIsDown(0) || keyIsDown('Space')) && allowInput;
 
+        let isPushingDown = (mouseIsDown(0) || keyIsDown('Space')) && allowInput;
         if (testAutoplay && !endBoost)
         {
             // todo: predict ground location
@@ -284,8 +293,15 @@ class Player extends EngineObject
             this.velocity.x += .0005;
         }
 
+        // detect button release
+        const releasedPushingDown = !isPushingDown && this.wasPushingDown && (allowInput||testAutoplay);
+        this.wasPushingDown = isPushingDown;
         if (isPushingDown)
+        {
+            // dive down
             this.velocity.y -= .014;
+            this.jumpTimer.unset();
+        }
 
         if (isOnGround)
         {
@@ -294,18 +310,19 @@ class Player extends EngineObject
             const vN = n.scale(this.velocity.dot(n));
             this.velocity = this.velocity.subtract(vN);
             this.airTimer.set();
+            this.airMeowTimer.set(rand(.1,.3));
 
-            if (mouseWasReleased(0) && allowInput)
+            if (releasedPushingDown)
             {
                 // jump
                 this.velocity.y += .1;
                 this.blinkTimer.set(.2);
-
                 sound_jump.play();
             }
-
-            this.airMeowTimer.set(rand(.1,.3));
         }
+
+        if (releasedPushingDown )
+            this.jumpTimer.set(.5); // always set jump timer on release
 
         if (this.airMeowTimer.elapsed() && !this.meowStopTimer.active() && !isOnGround)
         {
@@ -317,12 +334,12 @@ class Player extends EngineObject
         }
 
         let spawnParticles = hasWon;
-        if (this.boostTimer.active() && allowInput || endBoost)
+        if (this.boostTimer.active() && (allowInput||testAutoplay) || endBoost)
         {
             // apply boost
             this.velocity.x = max(this.velocity.x, .4);
             if (endBoost)
-                this.velocity.y += .0025;
+                this.velocity.y += .003;
             spawnParticles = 1;
         }
         if (this.bubbleTimer.active())
@@ -338,13 +355,15 @@ class Player extends EngineObject
             {
                 const size = vec2(1)
                 const angle = rand(9);
-                const colorStart = hsl(rand(.15),1,rand(.5,1));
-                const colorEnd =   hsl(rand(.15),1,rand(.5,1),0);
+                const evilParticles = this.catType == 12;
+                const rainbowParticles = this.catType == 10;
+                const colorStart = evilParticles ? BLACK : hsl(rand(rainbowParticles ? 1 : .15),1,rand(.4,.8));
+                const colorEnd = evilParticles ? hsl(0,0,0,0) : hsl(rand(.15),1,rand(.5,1),0);
                 const lifeTime = rand(.4,.5);
                 const sizeStart = rand(.1,.3);
                 const sizeEnd = rand(.1,.3);
-                const additive = 1;
-                const pos = this.pos.add(randInCircle(.5))
+                const additive = !evilParticles;
+                const pos = this.pos.add(randInCircle(this.size.y/2))
                 const p = new SimpleParticle(pos, size, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd, additive);
                 p.gravityScale = .2;
                 p.velocity = randVector(.02);
@@ -352,7 +371,7 @@ class Player extends EngineObject
         }
 
         // clamp speed
-        const minSpeed = tripMode? .2: .05;
+        const minSpeed = .05;
         const maxSpeed = .6;
         const maxYSpeed = .6;
         this.velocity.x = clamp(this.velocity.x, minSpeed, maxSpeed);
@@ -364,20 +383,21 @@ class Player extends EngineObject
             this.velocity.x = 0;
         if (hasWon)
         {
-            // flying!
+            // cats can fly
             const p1 = percent(winTimer,3,winTimeFlyAway);
             const p2 = percent(winTimer,0,3);
             this.velocity.x = lerp(p1, .1, .5);
-            this.pos.y = lerp(p2, this.pos.y, 6 + noise1D(time/2)*2);
+            this.pos.y = lerp(p2, this.pos.y, 9 + noise1D(time/2)*2);
             this.gravityScale = 0;
         }
 
         // rotate to match velocity
-        const isCloseToGround = heightAboveGround<.1;
+        const isCloseToGround = this.airTimer<.15;
         const isStill = this.velocity.length() < .01;
-        const targetAngle = hasWon ? noise1D(time/2)*.2-.1 :
+        const endFlips = this.catType == 6;
+        const targetAngle = hasWon ? endFlips ? winTimer*9 :noise1D(time/2)*.2-.1 :
             isStill || titleScreen || gameOver? 0 : isPushingDown && !isCloseToGround ? 0 : this.velocity.angle() - PI/2;
-        this.angle = lerp(.05, this.angle, targetAngle);
+        this.angle = lerp(.1, this.angle, targetAngle, 2*PI);
 
         // head animation
         const headAngleTarget = gameOver || titleScreen ? -noise1D(time/2)*.3+.1 : isPushingDown ? isOnGround ? Math.sin(this.pos.x*2)*.3 : -.1 : 0;
@@ -393,7 +413,7 @@ class Player extends EngineObject
         else
         {
             this.legModePercent = clamp(this.legModePercent + 
-                ((this.airTimer<.1)&&!isStill?-.05:.1), 0, 1);
+                (isCloseToGround && !this.jumpTimer.active() &&!isStill?-.05:.1), 0, 1);
             this.airLegAngle = lerp(.2, this.airLegAngle, isPushingDown||isStill ? .3: 1.3);
             this.legsAngle = lerp(this.legModePercent, Math.sin(this.pos.x*2)+.3, this.airLegAngle);
             this.legsAngle2 = lerp(this.legModePercent, Math.cos(this.pos.x*2)+.3, this.airLegAngle);
@@ -407,20 +427,21 @@ class Player extends EngineObject
         {
             // debug controls
             if (mouseIsDown(1))
-                this.velocity.y = 0,this.pos.y = mousePos.y
+                this.velocity.y = 0,this.pos.y = mousePos.y;
             if (keyIsDown('KeyX'))
                 this.pos.x = this.pos.x+2;
             if (keyIsDown('KeyZ'))
                 this.pos.x = this.pos.x-2;
             if (keyWasPressed('KeyN'))
+            {
+                ++boostIslandID; // prevent boost islands
                 this.pos.x = ((activeIslandID+1)*islandDistance+20);
+            }
             if (mouseIsDown(2))
                 this.velocity.x = 0; // brake ability for testing
         }
 
-        super.update();
-
-        // clamp y position after physics update
+        // clamp y position
         this.pos.y = min(this.pos.y, maxHeight-playerSpaceAbove);
         this.wasOnGround = isOnGround;
     }
@@ -440,13 +461,17 @@ class Player extends EngineObject
         const color3 = this.color3;
         const eyeColor = this.colorEye;
         const topAngle = this.angle;
-        const h = this.isMenuCat ? this.pos.y -.5: getGroundHeight(this.pos.x);
+        const h = this.isMenuCat ? this.pos.y -this.size.y/2: getGroundHeight(this.pos.x);
         const n = this.isMenuCat ? vec2(0,1) : getGroundNormal(this.pos.x);
-        const OP = (ofset, pos=this.pos, angle=topAngle) => pos.add(ofset.rotate(angle));
+        const scale = this.size.y;
+        const posScale = this.drawPosScale;
+        const OP = (offset, pos=this.pos, angle=topAngle) => pos.add(offset.scale(posScale).rotate(angle));
+        const drawScaleTile = (pos, size, tileInfo, color, angle) =>
+        { drawTile(pos, size.scale(scale), tileInfo, color, angle); }
 
         // shadow
         const shadowScale = clamp(1-(this.pos.y-h)/4,0,1);
-        drawTile(vec2(this.pos.x,h-.1), vec2(1.7,.5).scale(shadowScale), spriteAtlas.circle, hsl(0,0,0,.3), n.angle());
+        drawScaleTile(vec2(this.pos.x,h-.1), vec2(1.7,.5).scale(shadowScale), spriteAtlas.circle, hsl(0,0,0,.3), n.angle());
 
         // tail
         const tail = OP(vec2(-.4,.2));
@@ -455,14 +480,14 @@ class Player extends EngineObject
             for (let i=0; i<this.tailPoints.length; i++)
             {
                 const c = color2.scale(.8);
-                drawTile(OP(this.tailPoints[i],tail), vec2(this.tailWidth), spriteAtlas.circleSmall, c);
+                drawScaleTile(OP(this.tailPoints[i],tail), vec2(this.tailWidth), spriteAtlas.circleSmall, c);
             }
         }
         for (let i=0; i<this.tailPoints.length; i++)
         {
             const c = this.tailStripeColor && i%20>10 ? this.tailStripeColor :
                 color2.scale(!this.hasStripes || i%20>10 || .8);
-            drawTile(OP(this.tailPoints[i],tail), vec2(this.tailWidth-.1*!this.hasStripes), spriteAtlas.circleSmall, c);
+            drawScaleTile(OP(this.tailPoints[i],tail), vec2(this.tailWidth-.1*!this.hasStripes), spriteAtlas.circleSmall, c);
         }
 
         const legSprite = this.hasStripes ? spriteAtlas.legStriped : spriteAtlas.leg;
@@ -471,31 +496,31 @@ class Player extends EngineObject
 
         // far legs
         const leg1 = OP(vec2(.3,-.3));
-        drawTile(leg1, vec2(1), legSprite, color2, topAngle-this.legsAngle);
+        drawScaleTile(leg1, vec2(1), legSprite, color2, topAngle-this.legsAngle);
         const leg2 = OP(vec2(-.3,-.3));
-        drawTile(leg2, vec2(1), legSprite, color2, topAngle+this.legsAngle);
+        drawScaleTile(leg2, vec2(1), legSprite, color2, topAngle+this.legsAngle);
 
         // body
-        drawTile(this.pos, vec2(1), bodySprite, color, topAngle); 
+        drawScaleTile(this.pos, vec2(1), bodySprite, color, topAngle); 
 
         // near legs
         const leg3 = OP(vec2(.4,-.3));
-        drawTile(leg3, vec2(1), legSprite, color2, topAngle-this.legsAngle2);
+        drawScaleTile(leg3, vec2(1), legSprite, color2, topAngle-this.legsAngle2);
         const leg4 = OP(vec2(-.2,-.3));
-        drawTile(leg4, vec2(1), legSprite, color2, topAngle+this.legsAngle2);
+        drawScaleTile(leg4, vec2(1), legSprite, color2, topAngle+this.legsAngle2);
 
         // head
         const headAngle = topAngle+this.headAngle;
         const collarPos = OP(vec2(.25,.2));
-        drawTile(collarPos, vec2(.6), spriteAtlas.circle, color3, topAngle);
+        drawScaleTile(collarPos, vec2(.6), spriteAtlas.circle, color3, topAngle);
         const headPos = OP(vec2(.3,.3));
-        drawTile(headPos, vec2(1), headSprite, color2, headAngle);
+        drawScaleTile(headPos, vec2(1), headSprite, color2, headAngle);
 
         // nose
         const nose = OP(vec2((.2-.05)/2,-.1), headPos,headAngle);
         const noseSize = vec2(.1,.06).scale(this.noseScale);
         if (this.noseScale)
-            drawTile(nose, noseSize, spriteAtlas.circleSmall, this.noseColor, headAngle);
+            drawScaleTile(nose, noseSize, spriteAtlas.circleSmall, this.noseColor, headAngle);
         
         // right eye
         const pupilLook = .03;
@@ -505,17 +530,24 @@ class Player extends EngineObject
         const eyeSize = vec2(.2,.2*blinkScale);
         const eyePupil1 = OP(vec2(.2+pupilLook,.02), headPos,headAngle);
         const eyePupilSize = this.eyeType == 2? vec2(.05,.05*blinkScale)  : this.eyeType == 1? vec2(.08,.19*blinkScale) :  vec2(.13,.13*blinkScale);
-        drawTile(eye1, eyeFullSize, spriteAtlas.circleSmall, color2, headAngle);
-        drawTile(eye1, eyeSize, spriteAtlas.circleSmall, eyeColor, headAngle);
-        drawTile(eyePupil1, eyePupilSize, spriteAtlas.circleSmall, BLACK, headAngle);
+        drawScaleTile(eye1, eyeFullSize, spriteAtlas.circleSmall, color2, headAngle);
+        drawScaleTile(eye1, eyeSize, spriteAtlas.circleSmall, eyeColor, headAngle);
+        drawScaleTile(eyePupil1, eyePupilSize, spriteAtlas.circleSmall, BLACK, headAngle);
 
         // left eye
         const eye2 = OP(vec2(-.05,.02), headPos,headAngle);
         const eyeColor2 = this.catType == 7 ? YELLOW: eyeColor
         const eyePupil2 = OP(vec2(-.05+pupilLook,.02), headPos,headAngle);
-        drawTile(eye2, eyeFullSize, spriteAtlas.circleSmall, color2, headAngle);
-        drawTile(eye2, eyeSize, spriteAtlas.circleSmall, eyeColor2, headAngle);
-        drawTile(eyePupil2, eyePupilSize, spriteAtlas.circleSmall, BLACK, headAngle);
+        drawScaleTile(eye2, eyeFullSize, spriteAtlas.circleSmall, color2, headAngle);
+        drawScaleTile(eye2, eyeSize, spriteAtlas.circleSmall, eyeColor2, headAngle);
+        drawScaleTile(eyePupil2, eyePupilSize, spriteAtlas.circleSmall, BLACK, headAngle);
+    }
+    
+    endIslandBoost()
+    {
+        sound_jump.play(1, .5);
+        this.endBoostTimer.set(2);
+        this.velocity = vec2(.6)
     }
 
     pickup(type)
@@ -533,17 +565,16 @@ class Player extends EngineObject
         {
             if (this.coinRunTimer.elapsed())
                 this.coinRunCount = 0;
-            this.coinRunTimer.set(.4);
-            sound_coin.playNote([0,2,4,7,12,14,16][this.coinRunCount%7]);
+            this.coinRunTimer.set(.5);
+            sound_coin.playNote(this.coinRunCount);
             ++this.coinRunCount;
             ++saveData.coins;
             writeSaveData();
         }
-        else if (type == 3) // end of island boost
+        else if (type == 3) // bad pickup, slow down
         {
-            //sound_boost.play();
-            this.endBoostTimer.set(2);
-            this.velocity = vec2(.6)
+            sound_gameOver.play(1,2);
+            this.velocity = vec2();
         }
         else if (type == 4) // jump bubbles
         {
@@ -552,11 +583,6 @@ class Player extends EngineObject
             if (this.velocity.y < 0)
                 this.velocity.y = -.5*this.velocity.y;
         }
-        else if (type == 5) // bad pickup, slow down
-        {
-            sound_gameOver.play(1,2);
-            this.velocity = vec2();
-        }
     }
 
     meow()
@@ -564,7 +590,10 @@ class Player extends EngineObject
         if (this.meowTimer.active())
             return;
 
-        sound_meow.play(this.meowVolume, this.meowPitch);
+        const sound = rand() < .5 || this.catType == 6 ? sound_meow : sound_meow2;
+        sound.play(this.meowVolume, this.meowPitch);
+        //sounds_cat[this.catType].play();
+
         if (this.catType != 9 && this.meowCount++ < 1 && rand() < (this.catType == 11 ? .6:.3)) // double meow sometimes
             this.meowTimer.set(rand(.25,.4));
         else

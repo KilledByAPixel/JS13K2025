@@ -62,7 +62,13 @@ class Pickup extends WorldObject
         if (testLevelView)
             return; // prevent going away in test view
 
-        if (this.type == 1 || this.type == 5) // boost
+        {
+            // adjust to ground height (incase ground moves)
+            const ground = getGroundHeight(this.pos.x);
+            this.pos.y = ground;
+        }
+
+        if (this.type == 1 || this.type == 3) // boost or bad pickup
         {
             // create particles
             const good = this.type == 1;
@@ -86,17 +92,9 @@ class Pickup extends WorldObject
 
     render()
     {
-        if (this.type == 3) // end of island boost
-        {
-            if (testLevelView) // only visible in level view
-                drawTile(this.pos, this.size, this.tileInfo, RED);
-            return;
-        }
-
         const height = this.height;
         const wind = .2*Math.sin(time+this.pos.x/2);
         const topPos = this.pos.add(vec2(0,height + wind));
-
         const a = this.pos.x + time*this.spinSpeed;
         if (this.type == 1) // boost
         {
@@ -107,6 +105,13 @@ class Pickup extends WorldObject
         }
         else if (this.type == 2) // coin
             drawCoinPickup(topPos, this.size, this.color1, this.color2, a);
+        else if (this.type == 3) // bad pickup, slow down
+        {
+            for(let i=5; i--;)
+                drawTile(topPos.add(vec2(.2).rotate(a+i/5*2*PI)), this.size, this.tileInfo, hsl(0,1,.5,.5));
+            for(let i=5; i--;)
+                drawRect(topPos.add(vec2(.1).rotate(a+i/5*2*PI)), vec2(.2,.5), BLACK, a+i/5*PI*2);
+        }
         else if (this.type == 4) // jump bubbles
         {
             for(let i=6; i--;)
@@ -114,13 +119,6 @@ class Pickup extends WorldObject
                 const p = i/5;
                 drawTile(topPos.add(this.size.scale(-p*.2)), this.size.scale(p), this.tileInfo, hsl(.6,1,1-p/2,1-p/2), a);
             }
-        }
-        else if (this.type == 5) // bad pickup, slow down
-        {
-            for(let i=5; i--;)
-                drawTile(topPos.add(vec2(.2).rotate(a+i/5*2*PI)), this.size, this.tileInfo, hsl(0,1,.5,.5));
-            for(let i=5; i--;)
-                drawRect(topPos.add(vec2(.1).rotate(a+i/5*2*PI)), vec2(.2,.5), BLACK, a+i/5*PI*2);
         }
 
         // draw shadow
@@ -141,8 +139,9 @@ function drawCoinPickup(pos, size, color1=hsl(.65,1,.5), color2=hsl(.15,1,.7), a
     }
 
     const tileInfo = spriteAtlas.circle;
+    const backColor = rgb(1,1,1,.3);
     for(let i=5; i--;)
-        drawTile(pos, size.scale(.2+i/5), tileInfo, hsl(0,0,1,.3), a, 0, undefined, 1, screenSpace);
+        drawTile(pos, size.scale(.2+i/5), tileInfo, backColor, a, 0, undefined, 1, screenSpace);
     for(let i=3; i--;)
         drawTile(pos,  vec2(.8,.3).multiply(size), tileInfo, color1, i/3*PI+a, 0, undefined, 1, screenSpace);
     drawTile(pos, size.scale(.3), spriteAtlas.circleSmall, color2, a, 0, undefined, 1, screenSpace);

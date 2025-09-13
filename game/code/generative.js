@@ -5,27 +5,20 @@ const parallaxTextureSize = 2048;
 const parallaxTextureLayers = 4;
 let debugGenerativeCanvas;
 let parallexCanvas, colorBandCanvas, parallexWorkCanvas;
+const parallaxTileInfo = new TileInfo(vec2(),vec2(parallaxTextureSize));
+const colorBandTileInfo = new TileInfo(vec2(),vec2(.1));
 
 const islandCount = 13;
 const catCount = 13;
 const trackResolution = 5; // points per unit distance
 
-// end of island ramp 
-const islandEndRampFade = 20;  // how much to fade into the ramp
-const islandEndRampUp = 110;   // how long to go before the ramp
-const islandEndGap = 150;      // where the gap starts
-const islandEndRamp = 215;     // total length of end ramp including gap
+// end of island ramp settings
+const islandEndRampFade = 60;  // how much to fade into the ramp
+const islandEndRampUp = 140;   // how long to go before the ramp
+const islandEndGap = 160;      // where the gap starts
+const islandEndRamp = 230;     // total length of end ramp including gap
 const islandDistance = 600;    // length of each island
 const islandEndDownSlope = .4; // down slope of end ramp
-
-/* // small islands for testing
-const islandScale = 3;
-const islandEndRampFade = 20/islandScale|0;  // how much to fade into the ramp
-const islandEndRampUp = 110/islandScale|0;   // how long to go before the ramp
-const islandEndGap = 150/islandScale|0;      // where the gap starts
-const islandEndRamp = 200/islandScale|0;     // total length of end ramp
-const islandDistance = 600/islandScale|0;    // length of each island
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -50,9 +43,9 @@ class Island
         this.hue = random.float();
         this.textureHue = ((this.hue*generativeTextureSize|0) || 1) + .5;
         this.hillWrapCount = random.float(-4,4);
-        this.hueTextureSlide = random.float() < .1 ? 0 : random.float(2,50) * random.sign();
+        this.hueTextureSlide = random.float() < .1 ? 0 : random.floatSign(2,50);
         this.sceneryType = random.int(5);
-        this.sceneryHue = this.hue + random.float(.1,.2) * random.sign();
+        this.sceneryHue = this.hue + random.floatSign(.1,.2);
 
         const difficulty = percent(id, 0, islandCount-1);
         this.waveRate1 = random.float(.35,.45) + difficulty * random.float(-.1,.1);
@@ -61,11 +54,11 @@ class Island
         this.waveScale2 = difficulty * random.float(1,2);
         this.noiseScale = .5 + difficulty * random.float(1,2);
         this.noiseRate = .005 + difficulty * random.float(.02,.04);
-        this.lineColor = hsl(this.hue + random.float(.1,.3) * random.sign(),.2,.2);
+        this.lineColor = hsl(this.hue + random.floatSign(.1,.3),.2,.2);
 
         const backgroundHue = this.hue + random.float(.2,.8); // not the same as main hue
         this.backgroundColorTop    = hsl(backgroundHue, random.float(.2,.5),.5);
-        this.backgroundColorBottom = hsl(backgroundHue + random.float(.1,.3) * random.sign(), random.float(.4,.8),.9);
+        this.backgroundColorBottom = hsl(backgroundHue + random.floatSign(.1,.3), random.float(.4,.8),.9);
     }
 }
 
@@ -130,25 +123,22 @@ function generateWorld()
             y = lerp(p,y,6);
         }
 
-        let endOfIslandBoost = 0;
-        let cameraBottom = 0;
+        let cameraY = 0;
         if (testNoRamps)
         {
-            const trackPoint = track[i] = new TrackPoint(y, cameraBottom);
-            if (endOfIslandBoost)
-                trackPoint.pickupType = 3;
+            track[i] = new TrackPoint(y, 0);
             continue;
         }
 
         // check if end of island
-        const belowRampHeight = -60;
+        const belowRampHeight = -80;
         if (islandX > islandDistance-islandEndRamp)
         {
             // har far we are in the ramp
             const rampDistance = islandX - (islandDistance-islandEndRamp);
             let rampY = -rampDistance*islandEndDownSlope;
-            let rampBumps = Math.sin(rampDistance/2)*.4 ;
-            let cameraY = rampY; // no bumps on camera
+            let rampBumps = Math.sin(rampDistance/2)/2;
+            cameraY = rampY; // no bumps on camera
 
             const p3 = smoothStep(1-percent(rampDistance, 0, islandEndRampUp)**4);
             rampY += p3 * rampBumps;
@@ -157,7 +147,7 @@ function generateWorld()
             {
                 // the ramp part of the jump
                 const p = percent(rampDistance, islandEndRampUp, islandEndGap);
-                const ramp = p**2*26;
+                const ramp = p**2*13;
                 rampY += ramp
                 cameraY += ramp;
             }
@@ -168,23 +158,19 @@ function generateWorld()
             y = lerp(rampFade, y, rampY);
             cameraY = lerp(rampFade, 0, cameraY+cameraBelowRampHeight);
 
-            const islandEndBoostBeforeGap = 2;
-            const islandEndGapFade = 20;
-            if (rampDistance == islandEndGap - islandEndBoostBeforeGap)
-                endOfIslandBoost = 1;
-
-            cameraBottom = cameraY;
             if (rampDistance > islandEndGap)
             {
-                // in the gap part of the jump
+                const islandEndGapFade= 9;
                 const p = percent(rampDistance, islandEndGap, islandEndGap+islandEndGapFade); // fade down into the gap
                 y = lerp(smoothStep(p), y, belowRampHeight);
 
-                const p2 = smoothStep(percent(rampDistance, islandEndGap, islandEndRamp)); // percent fading back to normal
-                cameraBottom = lerp(p2, rampEndBottom, 0);
+                // fade camera back to normal the gap part of the jump
+                const p2 = percent(rampDistance, islandEndGap, islandEndRamp);
+                cameraY = lerp(p2, rampEndBottom, 0);
+
             }
             else
-                rampEndBottom = cameraBottom;
+                rampEndBottom = cameraY;
         }
         else
             rampEndBottom = 0;
@@ -195,12 +181,7 @@ function generateWorld()
             y = lerp(p, belowRampHeight, y);
         }
 
-        //h-=i/12;
-        //const i = clamp(x/islandDistance|0, 0, islandCount-1);
-
-        const trackPoint = track[i] = new TrackPoint(y, cameraBottom);
-        if (endOfIslandBoost)
-            trackPoint.pickupType = 3;
+        track[i] = new TrackPoint(y, cameraY);
     }
 
     // set pickup locations
@@ -216,9 +197,12 @@ function generateWorld()
         const islandX = x % islandDistance;
         const island = getIsland(x);
 
+        if (trackPoint.pickupType)
+            continue; // already a pickup here
+
         if (islandX < islandFadeIn+10 && !testPickups)
             continue; // start of new island
-            
+                
         if (islandX > islandDistance-islandEndRamp)
         {
             const startSpace = 20;
@@ -235,14 +219,14 @@ function generateWorld()
         const extraPickups = island.id == extraPickupIsland;
         const firstIsland = !island.id;
         const finalIsland = island.id == islandCount-1;
-        if (bubblePickups && i%20==0 && random.float() < .5)
+        if (bubblePickups && i%18==0 && random.float() < .8)
         {
             // make bubble
-            track[i].pickupType = 4;
+            trackPoint.pickupType = 4;
         }
 
         // check if slope is changing from down to up
-        const slope = (track[i].y > track[i-1].y) - (track[i+1].y > track[i].y);
+        const slope = (trackPoint.y > track[i-1].y) - (track[i+1].y > trackPoint.y);
         if (slope < 0 && (i - lastPickup > 150 || testPickups))
         if (!trackPoint.pickupType) // not already a pickup here
         if (random.float() < (firstIsland?.4:.7)  || extraPickups || testPickups) // chance of pickup
@@ -250,11 +234,11 @@ function generateWorld()
             // what type of pickup?
             if (!bubblePickups && // no boost on bubble island
                 !lastPickupWasBoost && // prevent 2 boosts in a row
-                (random.float() < .8 || finalIsland) && // more boosts towards end of game
+                (random.float() < .8 + finalIsland + badPickups) && // more boosts towards end of game
                 islandX < islandDistance-islandEndRamp-20) // dont put boosts near ramp
             {
                 // boost
-                trackPoint.pickupType = badPickups ? 5 : 1;
+                trackPoint.pickupType = badPickups && random.float() < .5 ? 3 : 1;
                 lastPickup = i;
                 lastPickupWasBoost = 1;
             }
@@ -313,7 +297,7 @@ function generateParallaxTexture()
         const noiseRate = random.float(.005,.02);
         const noisePos = random.float(1e4);
         const bandNoiseRate = random.float(20, 50);
-        const textureSlide = random.float(.2,.6) * random.sign();
+        const textureSlide = random.floatSign(.2,.6);
         const bandBaseHue = random.float();
 
         {
@@ -433,11 +417,10 @@ function getTrackPoint(x) { return track[clamp(x*trackResolution|0,0,track.lengt
 
 function getGroundHeightI(i)
 {
-    const ground = track[clamp(i|0,0,track.length-1)].y;
-    let movement = 0;
-    if (tripMode)
-        movement = (noise1D(i/5+time)-.5)*2;
-    return ground + movement;
+    let ground = track[clamp(i|0,0,track.length-1)].y;
+    if (i > (islandCount-1)*islandDistance*trackResolution)
+        ground += (Math.sin(i/19-time)+1)/3; // final island movement
+    return ground;
 }
 
 function getGroundHeight(x)
@@ -450,15 +433,20 @@ function getGroundHeight(x)
 
 function getGroundNormal(x)
 {
-    const e = .01;
+    const e = .1;
     const h1 = getGroundHeight(x+e);
     const h2 = getGroundHeight(x-e);
     const slope = (h2 - h1)/e/2;
     return vec2(slope, 1).normalize();
 }
 
+function hash1D(x)
+{
+    const random = new RandomGenerator((x|0)**2||1);
+    return random.float();
+}
+
 function noise1D(x)
 {
-    const hash = x=>((x+2e3|0)**3.1)%1; // check if the same on all browsers
-    return lerp(smoothStep(mod(x,1)), hash(x), hash(x+1));
+    return lerp(smoothStep(mod(x,1)), hash1D(x), hash1D(x+1));
 }

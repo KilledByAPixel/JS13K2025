@@ -30,9 +30,9 @@ let gameTimer = new Timer;
 let islandTimer = new Timer;
 let gameOverTimer = new Timer;
 let winTimer = new Timer;
-let activeIslandID;
-let tripMode = 0;
-let autoPause = !isTouchDevice;
+let activeIslandID, boostIslandID;
+//let tripMode;
+let autoPause = !isTouchDevice; // auto pause when focus is lost
 let timeLeft;
 let colorBandTextureInfo;
 let parallaxTextureInfo;
@@ -49,11 +49,11 @@ let testLevelView;
 let testRandomize;
 let testNoRamps;
 let testAutoplay;
-let testLevel;
 let testSeed;
 let testStore;
 let menuCats;
 let testMakeThumbnail;
+let testGodMode;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,22 +63,20 @@ function gameStart(isTitleScreen)
     engineObjectsDestroy();
 
     // settings
-    gravity = -.005;
-    titleScreen = quickStart || testAutoplay || testLevel ? 0 : isTitleScreen;
+    titleScreen = quickStart || testAutoplay ? 0 : isTitleScreen;
     timeLeft = 30;
-    activeIslandID = 0;
-    newDistanceRecord = 0;
+    activeIslandID = boostIslandID = newDistanceRecord = lastWinTime = 0;
+    if (testAutoplay)
+        gameMode = 1; // remix mode
 
     // create objects
     cameraPos = vec2();
-    world = new World;
-    player = new Player(saveData.selectedCatType);
     menuCats = [];
     if (titleScreen)
     {
-        const menuCat = 1;
+        const isMenuCat = 1;
         for(let i=catCount;i--;)
-            menuCats[i] = new Player(i, menuCat);
+            menuCats[i] = new Player(i, isMenuCat);
     }
     gameTimer.set();       // total time playing since game start
     islandTimer.set();     // total time in this island
@@ -88,6 +86,12 @@ function gameStart(isTitleScreen)
     if (!gameContinued && !isTitleScreen)
         saveData.lastMode = -1; // reset last mode if new game
 
+    // start in attract mode if title screen
+    attractMode = titleScreen && !testTitleScreen && !testStore && !testAutoplay;
+
+    world = new World;
+    player = new Player(saveData.selectedCatType);
+    
     // fix camera still being in old place causing objects to despawn!
     updateCamera();
 }
@@ -95,32 +99,36 @@ function gameStart(isTitleScreen)
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
-    attractMode = !testTitleScreen && !testStore && !testAutoplay; // start in attract mode
     if (testStore)
         storeMode = 1;
-    //overlayCanvas.style.imageRendering = 'auto'; // smoother rendering for overlay text
+    if (testStore)
+        quickStart = 0;
+    //mainCanvas.style.imageRendering = 'auto'; // smoother rendering for overlay text
     debug && console.log(gameName + ' v' + gameVersion + ' by Frank Force');
-    onblur = ()=>
+    if (autoPause)
     {
-        // auto pause when focus is lost
-        if (!isTouchDevice && !titleScreen && autoPause && !paused)
-            setPaused(1, 0);
+        onblur = ()=>
+        {
+            // auto pause when focus is lost
+            if (!isTouchDevice && !titleScreen && !paused)
+                setPaused(1, 0);
+        }
     }
 
     // sprites
     spriteAtlas =
     {
-        circle:       tile(0,16,0,1),
-        circleSmall:  tile(2,8,0,1),
-        triangle:     tile(7,16,0,1),
+        circle:       tile(0,16,1),
+        circleSmall:  tile(2,8,1),
+        triangle:     tile(7,16,1),
 
         // cat parts
-        body:         tile(2,16,0,1),
-        head:         tile(3,16,0,1),
-        leg:          tile(4,16,0,1),
-        bodyStriped:  tile(9,16,0,1),
-        headStriped:  tile(10,16,0,1),
-        legStriped:   tile(11,16,0,1),
+        body:         tile(2,16,1),
+        head:         tile(3,16,1),
+        leg:          tile(4,16,1),
+        bodyStriped:  tile(9,16,1),
+        headStriped:  tile(10,16,1),
+        legStriped:   tile(11,16,1),
     };
 
     generativeInit();
@@ -133,9 +141,6 @@ function gameInit()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
-    if (testLevel)
-        return;
-
     if (titleScreen)
     {
         // update title screen
@@ -143,11 +148,10 @@ function gameUpdate()
             attractMode = 0;
         if (keyWasPressed('Space'))
         {
-            // start the game
+            // start the game (get in without using the mouse)
             sound_select.play();
             titleScreen = 0;
             gameMode = 0;
-            clearInput();
             gameStart();
         }
         if (keyWasPressed('Escape'))
@@ -195,8 +199,20 @@ function gameUpdate()
         }
         else
         {
+            {
+                // boost at end of island
+                const nextIslandBoostLookAhead = 70; // just a little ahead of camera
+                const islandBoostID = (player.pos.x+nextIslandBoostLookAhead)/islandDistance|0;
+                if (islandBoostID > boostIslandID)
+                {
+                    boostIslandID = islandBoostID;
+                    player.endIslandBoost();
+                }
+            }
+
             // normal gameplay (not win or game over)
-            const islandID = player.pos.x/islandDistance|0;
+            const nextIslandLookAhead = 9; // just a little ahead of camera
+            const islandID = (player.pos.x+nextIslandLookAhead)/islandDistance|0;
             if (islandID > activeIslandID)
             {
                 // player got to new island
@@ -210,9 +226,7 @@ function gameUpdate()
                     saveData.remixUnlocked = 1; // unlock remix mode
                     if (gameMode == 0) // only save distance in classic mode
                         saveData.bestDistanceClassic = -1; // dont show distance again
-                    if (gameContinued)
-                        lastWinTime = 0;
-                    else
+                    if (!gameContinued)
                     {
                         // only save best time if not continued from a save
                         lastWinTime = gameTimer.get();
@@ -232,7 +246,7 @@ function gameUpdate()
                 else
                 {
                     islandTimer.set();
-                    timeLeft = min(timeLeft+20, 60); // extra time
+                    timeLeft = min(timeLeft+22, 30);
 
                     if (activeIslandID > 0)
                     {
@@ -254,8 +268,10 @@ function gameUpdate()
         
             // update game time  
             timeLeft -= timeDelta;
-            if (testAutoplay && timeLeft < 10)
-                timeLeft = 10; // dont let autoplay run out of time
+            if (testGodMode)
+                timeLeft = max(timeLeft,1);
+            //if (testAutoplay && timeLeft < 10)
+            //    timeLeft = 10; // dont let autoplay run out of time
             if (timeLeft <= 0)
             {
                 // game over!
@@ -305,7 +321,7 @@ function gameUpdatePost()
         // aspect ratio improvements
         // use whichever side is longer to get full pixel usage
         const minAspect = 1.6;
-        const maxAspect = 2.2;
+        const maxAspect = 2.5;
         const maxCanvasSize = vec2(1920*2, 1080*2);
         const innerAspect = innerWidth / innerHeight;
         if (innerAspect > maxAspect)
@@ -332,11 +348,15 @@ function gameUpdatePost()
     // pause/unpause
     if (!titleScreen)
     {
-        if (keyWasPressed('KeyP') || paused && mouseWasPressed(0) && !uiObjectWasClicked)
+        if (mouseWasPressed(0) && !uiObjectWasClicked)
+            setPaused(0);
+        if (debug && keyWasPressed('KeyP'))
             setPaused(!paused);
         if (keyWasPressed('Escape'))
         {
-            // quit after game over
+            // quit game
+            if (quickStart)
+                quickStart = 0;
             gameStart(1);
             sound_gameOver.play();
         }
@@ -347,23 +367,22 @@ function gameUpdatePost()
 
 function updateCamera()
 {
-    function getCameraBottom(x)
-    {
-        const i = clamp(x*trackResolution,0,track.length-2);
-        return lerp(i%1, track[i|0].bottom, track[i+1|0].bottom);
-    }
+    // position camera
+    const cbi = clamp(player.pos.x*trackResolution,0,track.length-2);
+    const cameraBottom = max(lerp(cbi%1, track[cbi|0].bottom, track[cbi+1|0].bottom),
+        player.pos.y - playerSpaceBelow); // limit max zoom
 
     // position camera
-    let cameraBottom = getCameraBottom(player.pos.x);
-    cameraBottom = max(cameraBottom, player.pos.y - playerSpaceBelow); // limit max zoom
-    const minZoom = .09; // max zoom in
+    //const icb = clamp(player.pos.x*trackResolution,0,track.length-2);
+    //const cameraBottom = max((icb%1, track[icb|0].bottom, track[icb+1|0].bottom), player.pos.y - playerSpaceBelow); // limit max zoom
+    const minZoom = titleScreen ? .1 : .08; // max zoom in
     cameraScale = minZoom*mainCanvasSize.y; // zoom
     const s = getCameraSize();
     const playerXOffset = .4;
     const maxPlayerPos = s.y-playerSpaceAbove+cameraBottom;
     const a = s.y + max(player.pos.y - maxPlayerPos, 0);
     cameraScale = mainCanvasSize.y / a;
-    let winOffset = max((winTimer-winTimeFlyAway)*20,0);
+    const winOffset = max((winTimer-winTimeFlyAway)*20,0);
     cameraPos = vec2(
         player.pos.x + playerXOffset*mainCanvasSize.x/cameraScale - winOffset, 
         getCameraSize().y/2+cameraBottom);
@@ -380,19 +399,14 @@ function updateCamera()
     {
         // move camera to show more of level at title screen
         const titleScreenDistance = islandDistance*9; // show 9 islands
-        cameraPos.x = 7 + max(gameTimer-5,0)%titleScreenDistance;
+        cameraPos = vec2(7 + max(gameTimer-5,0)%titleScreenDistance, 6);
     }
 
     if (testLevelView)
     {
         cameraPos = vec2(mousePosScreen.x/mainCanvasSize.x*islandDistance*islandCount, 0);
-        //cameraPos = vec2(522, 0);
+        cameraPos.x = .6*islandDistance*islandCount;
         cameraScale = 4;
-    }
-    if (testLevel)
-    {
-        cameraPos.x = time*29;
-        cameraScale = 10;
     }
 }
 
@@ -448,8 +462,8 @@ let saveData;
     saveData.bestTimeClassic = parseFloat(saveData.bestTimeClassic) || 0;
     saveData.bestTimeRemix = parseFloat(saveData.bestTimeRemix) || 0;
     saveData.selectedCatType = parseInt(saveData.selectedCatType) || 0;
-    if (!Array.isArray(saveData.cats))
-        saveData.cats = [];
+    if (!saveData.cats || !saveData.cats.length)
+        saveData.cats = []; // must be an array
     saveData.cats[0] = 1; // first cat is always unlocked
 }
 
@@ -458,3 +472,9 @@ function writeSaveData()
     //debug && console.log('WRITE SAVE DATA');
     localStorage.setItem(saveName, JSON.stringify(saveData));
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// image data
+
+//const imageSource = 'tiles.png';
+const imageSource = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACAAgMAAAC+UIlYAAAACVBMVEUAAAD///+9vb1a+/H2AAAAAXRSTlMAQObYZgAAAOVJREFUWMPtkj0KwzAMhRVDhmTqkr1Llp4iR8iQF0Knjj1GLlHomKGG4lPWyINbOT+FUjpUHxhr+MCW9Og9so6WycFnmQoNHzq4cVYAWhbMBWeicZ88D3QsFEBP5nRNvwA8CcdhTuBP1r4YDbyQtVLgNqNQDIng+Y4Q2/SELoLQy0FFgdzEghy1J0wyVE4ui+Fd/Ir2QyHmsbbjqpBZeyNqdrOh5dtaS6Yd1oWYqHTUlRcaFsy0IZR3uU0h5N22IAMjn5CC6KJ0MpNR4ETlkEKcZKjw2iXQyF2kgqIoiqIoiqIof88DCEVdiDHOHWkAAAAASUVORK5CYII="

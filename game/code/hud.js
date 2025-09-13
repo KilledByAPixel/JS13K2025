@@ -31,7 +31,6 @@ function createUI()
         sound_select.play();
         titleScreen = 0;
         gameMode = 0;
-        clearInput();
         gameStart();
     }
   
@@ -46,7 +45,6 @@ function createUI()
         sound_select.play();
         titleScreen = 0;
         gameMode = 1;
-        clearInput();
         gameStart();
     }
 
@@ -63,7 +61,6 @@ function createUI()
         titleScreen = 0;
         gameMode = saveData.lastMode;
         worldSeedContinue = saveData.lastSeed;
-        clearInput();
         gameStart();
         player.pos.x = saveData.lastIsland * islandDistance + 20;
         worldSeedContinue = 0;
@@ -80,15 +77,21 @@ function createUI()
     // back button in top corner
     class UICornerButton extends UIButton
     {
-        constructor(type) { super(vec2(), buttonSizeSmall); this.type = type; }
+        constructor(type)
+        {
+            super(vec2(), buttonSizeSmall);
+            this.type = type;
+            this.cornerRadius = 40;
+        }
+
         render()
         {
             super.render();
             if (this.type == 1)
             {
                 // pause
-                drawUIRect(this.pos.add(vec2( 16,0)), vec2(10,60), BLACK, undefined, undefined, 0);
-                drawUIRect(this.pos.add(vec2(-16,0)), vec2(10,60), BLACK, undefined, undefined, 0);
+                drawUIRect(this.pos.add(vec2( 16,0)), vec2(16,60), BLACK, 0, undefined, 0);
+                drawUIRect(this.pos.add(vec2(-16,0)), vec2(16,60), BLACK, 0, undefined, 0);
             }
             else
             {
@@ -99,11 +102,11 @@ function createUI()
         }
     }
     
-    const buttonSizeSmall = vec2(120);
+    const buttonSizeSmall = vec2(99);
     buttonBack = new UICornerButton;
     buttonBack.onClick = ()=>
     {
-        sound_select.play(1, .25);
+        sound_select.play(1, .5);
         if (storeMode)
         {
             storeMode = 0;
@@ -114,23 +117,19 @@ function createUI()
     }
 
     buttonPause = new UICornerButton(1);
-    buttonPause.onClick = ()=>
-    {
-        setPaused(!paused);
-        clearInput();
-    }
+    buttonPause.onClick = ()=> setPaused(!paused);
 }
 
 function createStoreUI()
 {
-    uiRoot.addChild(uiStore = new UIObject(vec2(0,180)));
+    uiRoot.addChild(uiStore = new UIObject(vec2(0,190)));
     //uiStore.visible = 0; // store hidden by default
    
     //const uiTextStoreTitle = new UIText(vec2(), vec2(1e3,100), 'L1ttl3 Paws Store');
     //uiStore.addChild(new UIText(vec2(), vec2(1e3,100), 'L1ttl3 Paws Store'));
 
     // back button in top corner
-    const buttonSize = vec2(220,200);
+    const buttonSize = vec2(290,300);
     class StoreButton extends UIButton
     {
         constructor(pos)
@@ -149,8 +148,7 @@ function createStoreUI()
             const isActiveCat = saveData.selectedCatType == this.catType;
             this.lineColor = isActiveCat ? WHITE : BLACK;
             this.disabledColor = this.hoverColor = this.color = rgb(0,0,0,0);
-            this.cornerRadius = 8;
-            this.lineWidth = 8;
+            this.cornerRadius = this.lineWidth = 8;
             super.render();
             const textSize = vec2(this.size.x*.6, this.size.y*.5);
             const owned = this.isOwned();
@@ -164,7 +162,7 @@ function createStoreUI()
 
             // background
             const canAfford = saveData.coins >= this.cost;
-            const backgroundSize = vec2(2.25,2.05)
+            const backgroundSize = vec2(2.7,2.8)
             drawRect(worldPos, backgroundSize, isActiveCat ? CYAN :
             owned ? this.mouseIsOver ? YELLOW : WHITE : this.mouseIsOver ? canAfford ? YELLOW : RED : hsl(0,0,.2));
 
@@ -173,7 +171,8 @@ function createStoreUI()
             ASSERT(menuCat)
             if (menuCat)
             {
-                menuCat.pos = worldPos.add(vec2(.1,.2));
+                menuCat.pos = worldPos.add(vec2(.1,owned ? -.1:.1));
+                menuCat.pos.y += menuCat.size.y/2;
                 menuCat.renderHack();
             }
 
@@ -182,12 +181,12 @@ function createStoreUI()
 
             if (!owned)
             {
-                const textPos = this.pos.add(vec2(.8,.55).multiply(textSize));
+                const textPos = this.pos.add(vec2(.75,.6).multiply(textSize));
                 const shadowPos = textPos.add(vec2(5,5));
                 const color = saveData.coins < this.cost ? RED : WHITE;
                 drawUIText(this.cost, shadowPos, textSize, BLACK, 0, undefined, 'right', this.font);
                 drawUIText(this.cost, textPos, textSize, color, 0, undefined, 'right', this.font);
-                drawCoinPickup(worldPos.add(vec2(-.7,-.5)), vec2(1), undefined, undefined, time/4);
+                drawCoinPickup(worldPos.add(vec2(-.8,-.7)), vec2(1), undefined, undefined, time/4);
             }
             if (isActiveCat)
             {
@@ -236,23 +235,20 @@ function createStoreUI()
         }
     }
 
-    const columns = 4
+    const columns = 5;
     storeButtons = [];
     for(let i=catCount; i--;)
     {
-        const col = i%columns;
-        const row = (i/columns)|0;
-
-        const pos = vec2((col - (columns-1)/2)*buttonSize.x*1.2, 
-            row*buttonSize.y*1.2);
-        if (row == 3)
-            pos.x = 0; // center last row
+        const j = i < 4 ? i : i>8 ? i+2 : i+1; // fix to make 13 fit nice
+        const col = j%columns;
+        const row = (j/columns)|0;
+        const pos = vec2((col - (columns-1)/2)*buttonSize.x*1.15, 
+            row*buttonSize.y*1.15);
             
         const cost = 100+i*50 + (i%2?0:13);
         const button = new StoreButton(pos);
         button.catType = i;
         button.cost = cost;
-        button.cornerRadius = 9;
         uiStore.addChild(button);
         storeButtons.push(button);
     }
@@ -332,21 +328,21 @@ function drawHUD()
         const s1 = generativeTextureSize*scale;
         const s2 = parallaxTextureSize*scale;
         if (debugGenerativeCanvas == 1)
-            overlayContext.drawImage(colorBandCanvas, 0, 0, s1*4, s1/2);
+            mainContext.drawImage(colorBandCanvas, 0, 0, s1*4, s1/2);
         else
-            overlayContext.drawImage(parallexCanvas, 0, 0, s2/2, s2/2);
+            mainContext.drawImage(parallexCanvas, 0, 0, s2/2, s2/2);
         return;
     }
     
     //drawTextShadow(gameName + ' v' + gameVersion, vec2(.99, .97), .05, rgb(1,1,1,.5), 'right');
-    const context = overlayContext;
+    const context = mainContext;
     context.strokeStyle = BLACK;
 
     if (!attractMode)
     {
         // draw coin count
         drawCoinPickup(vec2(.05, .93), vec2(.12), undefined, undefined, time/4, 1);
-        drawTextShadow(saveData.coins, vec2(.09, .94), .08, WHITE, 'left');
+        drawTextShadow(saveData.coins, vec2(.09, .94), .1, WHITE, 'left', undefined, .2);
     }
 
     if (titleScreen)
@@ -377,7 +373,15 @@ function drawHUD()
     else
     {
         // time left in corner
-        drawTextShadow((timeLeft).toFixed(1), vec2(.99, .94), .08, WHITE, 'right');
+        const timeColor = timeLeft < 5 ? RED : WHITE; // warning time
+        drawTextShadow(timeLeft.toFixed(1), vec2(.99, .94), .1, timeColor, 'right');
+
+        // show time and distance
+        if (debug)
+        {
+            drawTextShadow(formatTimeString(gameTimer), vec2(.01, .04), .05, WHITE, 'left');
+            drawTextShadow(player.pos.x.toFixed(1), vec2(.01, .09), .05, WHITE, 'left');
+        }
 
         const islandFade = 2;
         const islandHold = 5;
@@ -402,7 +406,7 @@ function drawHUD()
 
 function drawTitleScreen()
 {
-    const context = overlayContext;
+    const context = mainContext;
     const titleScreenTime = testTitleScreen ? 5+time : time;
     const alpha = clamp(titleScreenTime/.5);
     const textSize = .1;
@@ -414,7 +418,7 @@ function drawTitleScreen()
         return;
     }
         
-    if (attractMode && !testMakeThumbnail)
+    if (!isJS13KBuild && attractMode && !testMakeThumbnail)
         drawTextShadow(`Click To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-2)));
 
     for(let j=2;j--;) // top and bottom rows of text
@@ -469,23 +473,18 @@ function drawTitleScreen()
             }
         }
     }
-
-    //drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), .1, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-2)));
-
-    /*const s4 = mainCanvasSize.y*(.1+Math.sin(time*3+PI*2*1/3)*.005 )*s3*.6;
-    drawTextShadow(`A Game by Frank Force`, vec2(mainCanvasSize.x/2, mainCanvasSize.y*.53), s4, WHITE);
-    const s5 = mainCanvasSize.y*(.1+Math.sin(time*3+PI*2*2/3)*.005 )*s3*.6;
-    drawTextShadow(`Created for JS13K 2025`, vec2(mainCanvasSize.x/2, mainCanvasSize.y*.6), s5, WHITE);*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-function drawTextShadow(text, pos, size, color=WHITE, textAlign)
+function drawTextShadow(text, pos, size, color=WHITE, textAlign, font, maxWidth)
 {
     pos = pos.multiply(mainCanvasSize);
     size *= mainCanvasSize.y;
-    drawTextScreen(text, pos.add(vec2(size*.05)), size, rgb(0,0,0,color.a), 0, 0, textAlign);
-    drawTextScreen(text, pos, size, color, 0, 0, textAlign);
+    if (maxWidth)
+        maxWidth *= mainCanvasSize.y;
+    drawTextScreen(text, pos.add(vec2(size*.05)), size, rgb(0,0,0,color.a), 0, 0, textAlign, font, maxWidth);
+    drawTextScreen(text, pos, size, color, 0, 0, textAlign, font, maxWidth);
 }
 
 function formatTimeString(t, showMS=true)
@@ -493,8 +492,6 @@ function formatTimeString(t, showMS=true)
     const timeS = t%60|0;
     const timeM = t/60|0;
     const timeMS = t%1*1e3|0;
-    if (showMS)
-        return `${timeM}:${timeS<10?'0'+timeS:timeS}.${(timeMS<10?'00':timeMS<100?'0':'')+timeMS}`;
-    else
-        return `${timeM}:${timeS<10?'0'+timeS:timeS}`;
+    return `${timeM}:${timeS<10?'0'+timeS:timeS}` +
+        (showMS ? `.${(timeMS<10?'00':timeMS<100?'0':'')+timeMS}` : '');
 }

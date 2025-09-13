@@ -1,15 +1,32 @@
 'use strict';
 
 // sound effects
-const sound_meow = new Sound([.8,.1,900,.05,.2,.2,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
-const sound_select = new Sound([.5,,552,.02,.01,.04,,2.4,,,,,,,18,,,.59,,,-928]); // select
-const sound_boost = new Sound([,,126,.17,.02,.06,1,1.9,-13,,-43,.08,.07,.1,,.2,,.52,.16]); // Random 7688
-const sound_coin = new Sound([1.5,,110,.02,.01,.12,,.6,,,448,.05,,,,,.03,.6,.03]); // Pickup 7654
-const sound_gameOver = new Sound([.6,,294,.01,.17,.28,,2.2,,,493,.06,.06,,,.2,.16,.99,.15]); // Pickup 6602
-const sound_win = new Sound([1.39,,663,.02,.17,.42,1,.29,-6.4,1.1,,,.12,,,.2,,.53,.19,,-2303]); // Powerup 401;
-const sound_ui = new Sound([1,0]);
-const sound_jump = new Sound([.5,,250,.05,,,,1.3,,-35,,,,5]);
-const sound_bubble = new Sound([,,224,.02,.02,.08,1,1.7,-13.9,,,,,,6.7]);
+const sound_meow = new Sound([.7,.1,900,.05,.1,.1,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
+const sound_meow2 = new Sound([.7,.1,900,.05,.2,.2,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
+const sound_select = new Sound([,.2,900,.01,,.01,2,,18,,500,.01,.01]); // squeek
+const sound_jump = new Sound([.5,,250,.05,,,,2,,-40,,,,5]); // jump
+const sound_boost = new Sound([,,200,.2,.02,.06,1,2,-15,,-99,,.1,,,.2,,.5,.2]); // boost
+const sound_coin = new Sound([1.5,0,110,.02,.01,.2,,.6,,,440,.05,,,,,.03,.6,.03]); // coin
+const sound_bubble = new Sound([.9,,80,.01,,.01,,2,-50,,-400,.01,,,25,,,.8,.01,,-1e3]); // bubble
+const sound_win = new Sound([2,,630,.02,.2,1,,2,-6,1,,,.12,,,.2,,.5,.2,,-2e3]); // win
+const sound_gameOver = new Sound([.6,,300,.01,.2,.7,,2,,,-30,.05,.07,,,.2,.3,,.1]); // game over
+
+
+/*
+new Sound([2.48,,1910,,,.02,2,.07,-75,-13,147,,,,,,.01,.25]); // wood hit
+new Sound([,,129,.01,,.15,,,,,,,,5]); // drum
+new Sound([,0,261.6256,,,.07,,2]); // Toy Piano
+new Sound([,0,523.2511,.02,,.45,,1.15,,,,,,,,,.16]); // flute
+new Sound([,,2e3,,.005,.02,4]); // closed hat
+new Sound([,0,711,.01,.06,.01]); // whistle
+new Sound([,,411,,,.21,1,1.67,,,,,,,,.1,.01]); // cowbell
+
+new Sound([1.3,,110,.04,.2,2,,3,,1,332,.06,.05,,,,.3,.8,.3,.5,-1e3]); // win
+new Sound([,,1838,.03,,,,48,,,-30,.07,,.4]); // dry whiste
+new Sound([,,1004,,,.06,,27,13,,-157,.29]); // Blip 3169
+new Sound([,.2,1e3,.02,,.01,2,,18,,475,.01,.01]); // Squeek
+new Sound([5,,93,,.01,.005,1,2.7,,,,,.02,.3,15,,.12,.95,.18,.37,887]); // crackel
+*/
 
 /*
 const sounds_cat = [];
@@ -31,11 +48,15 @@ function gameAudioInit()
         const sustainVolume = random.float(.6,.7);
         const decay = random.float(.03,.06);
         sounds_cat[i] = new Sound([.8,.3,frequency,attack,sustain,release,5,shapeCurve,slide,deltaSlide,,,,noise,,crush,,sustainVolume,decay]);
-        //sounds_wind[i] = new Sound([1,0,300+i/(sounds_wind_count-1)*99]);
-        //sounds_wind.push(new Sound([.5,0,500*i/sounds_wind_count]));
     }
 }
 */
+
+const drumKick = new Sound([,,129,.01,,.15,,,,,,,,5]); // drumKick
+const drumHat = new Sound([,,2e3,,.005,.02,4]); // drumHat
+const flute = new Sound([,0,440,.02,,.45,,1.15,,,,,,,,,.16]); // flute
+const piano = new Sound([,0,220,,,.07,,2]); // Toy Piano
+const bass = new Sound([1.61,0,110,,.09,,1,.63,,,,,,,,,.02,.5,.04,,-165]); // bass
 ///////////////////////////////////////////////////////////////////////////////
 
 //let windVolume = .05;
@@ -44,6 +65,24 @@ let beatTimer = new Timer;
 let beatCount = 0;
 function musicUpdate()
 {
+    const musicMode = 0
+    const measureLength = musicMode == 1? 3 : 4;
+    const kickMeasureLength = 2; //3
+return
+    if (!beatTimer.active())
+    {
+        ++beatCount;
+        beatTimer.set(.1);
+
+        // precussion
+        if (1)
+        {
+            if (beatCount%measureLength==0||!randInt(9))
+                drumHat.play();
+            if (beatCount%kickMeasureLength==0||!randInt(9))
+                drumKick.play();
+        }
+    }
 
     return;
     // update music

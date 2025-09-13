@@ -257,9 +257,6 @@ class Particle extends EngineObject
         this.additive = additive;
         /** @property {Number} - If a trail, how long to make it */
         this.trailScale = trailScale;
-
-        // particles use circular clamped speed
-        this.clampSpeedLinear = false;
     }
 
     /** Render the particle, automatically called each frame, sorted by renderOrder */

@@ -101,8 +101,7 @@ function glPreRender()
     glClearCanvas();
     glContext.useProgram(glShader);
     glContext.activeTexture(gl_TEXTURE0);
-    if (textureInfos[0])
-        glContext.bindTexture(gl_TEXTURE_2D, glActiveTexture = textureInfos[0].glTexture);
+    glContext.bindTexture(gl_TEXTURE_2D, glActiveTexture = textureInfoDefault.glTexture);
 
     // set vertex attributes
     let offset = glAdditive = glBatchAdditive = 0;
@@ -285,10 +284,10 @@ function glSetAntialias(antialias=true)
  *  @param {Number} uv0Y
  *  @param {Number} uv1X
  *  @param {Number} uv1Y
- *  @param {Number} rgba
+ *  @param {Number} [rgba=-1]
  *  @param {Number} [rgbaAdditive=0]
  *  @memberof WebGL */
-function glDraw(x, y, sizeX, sizeY, angle, uv0X, uv0Y, uv1X, uv1Y, rgba, rgbaAdditive=0)
+function glDraw(x, y, sizeX, sizeY, angle, uv0X, uv0Y, uv1X, uv1Y, rgba=-1, rgbaAdditive=0)
 {
     ASSERT(typeof rgba == 'number' && typeof rgbaAdditive == 'number', 'invalid color');
 

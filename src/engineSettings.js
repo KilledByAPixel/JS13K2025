@@ -100,18 +100,6 @@ const tileFixBleedScale = 0;
 ///////////////////////////////////////////////////////////////////////////////
 // Object settings
 
-/** Enable physics solver for collisions between objects
- *  @type {Boolean}
- *  @default
- *  @memberof Settings */
-const enablePhysicsSolver = false;
-
-/** Default object mass for collision calculations (how heavy objects are)
- *  @type {Number}
- *  @default
- *  @memberof Settings */
-const objectDefaultMass = 1;
-
 /** How much to slow velocity by each frame (0-1)
  *  @type {Number}
  *  @default
@@ -124,18 +112,6 @@ const objectDefaultDamping = 1;
  *  @memberof Settings */
 const objectDefaultAngleDamping = 1;
 
-/** How much to bounce when a collision occurs (0-1)
- *  @type {Number}
- *  @default
- *  @memberof Settings */
-const objectDefaultElasticity = 0;
-
-/** How much to slow when touching (0-1)
- *  @type {Number}
- *  @default
- *  @memberof Settings */
-const objectDefaultFriction = .8;
-
 /** Clamp max speed to avoid fast objects missing collisions
  *  @type {Number}
  *  @default
@@ -146,7 +122,7 @@ const objectMaxSpeed = 1;
  *  @type {Number}
  *  @default
  *  @memberof Settings */
-let gravity = 0;
+const gravity = -.005;
 
 /** Scales emit rate of particles, useful for low graphics mode (0 disables particle emitters)
  *  @type {Number}
