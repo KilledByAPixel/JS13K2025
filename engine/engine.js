@@ -203,7 +203,6 @@ function engineInit()
             //pluginRenderList.forEach(f=>f());
             uiRender();
             //////////////////
-            touchGamepadRender();
             debugRender();
             glCopyToContext(mainContext);
 

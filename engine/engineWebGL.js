@@ -105,7 +105,7 @@ function glPreRender()
 
     // set vertex attributes
     let offset = glAdditive = glBatchAdditive = 0;
-    let initVertexAttribArray = (name, type, typeSize, size)=>
+    const initVertexAttribArray = (name, type, typeSize, size)=>
     {
         const location = glContext.getAttribLocation(glShader, name);
         const stride = typeSize && gl_INSTANCE_BYTE_STRIDE; // only if not geometry

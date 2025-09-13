@@ -158,32 +158,6 @@ const inputWASDEmulateDirection = false;
  *  @memberof Settings */
 const touchInputEnable = true;
 
-/** True if touch gamepad should appear on mobile devices
- *  - Supports left analog stick, 4 face buttons and start button (button 9)
- *  - Must be set by end of gameInit to be activated
- *  @type {Boolean}
- *  @default
- *  @memberof Settings */
-const touchGamepadEnable = false;
-
-/** True if touch gamepad should be analog stick or false to use if 8 way dpad
- *  @type {Boolean}
- *  @default
- *  @memberof Settings */
-const touchGamepadAnalog = true;
-
-/** Size of virtual gamepad for touch devices in pixels
- *  @type {Number}
- *  @default
- *  @memberof Settings */
-const touchGamepadSize = 99;
-
-/** Transparency of touch gamepad overlay
- *  @type {Number}
- *  @default
- *  @memberof Settings */
-const touchGamepadAlpha = .3;
-
 /** Allow vibration hardware if it exists
  *  @type {Boolean}
  *  @default
