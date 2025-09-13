@@ -77,8 +77,8 @@ function drawUIRect(pos, size, color=uiDefaultColor, lineWidth=uiDefaultLineWidt
 {
     mainContext.fillStyle = color.toString();
     mainContext.beginPath();
-    if (cornerRadius && mainContext.roundRect)
-        mainContext.roundRect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
+    if (cornerRadius && mainContext['roundRect'])
+        mainContext['roundRect'](pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
     else
         mainContext.rect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y);
     mainContext.fill();

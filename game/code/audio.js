@@ -61,7 +61,7 @@ function musicUpdate()
         // piano chords
         if (beatCount%64==0) // set new chord
             pianoNote = chordNote = beatCount%256 ? chordNote + randSign() : 0;
-        if (beatCount >= 64)
+        if (beatCount >= 32)
         {
             if (chordsActive)
             if (beatCount%2==0)
@@ -73,7 +73,7 @@ function musicUpdate()
             }
         }
     }
-    if (beatCount >= 128)
+    if (beatCount >= 64)
     {
         if (pianoActive)
         if (beatCount%4==0 && !randInt(9) || beatCount%2==0 && randInt(2))
