@@ -14,7 +14,7 @@ class World extends EngineObject
             defaultWorldSeed;               // classic mode
         if (testSeed)
             worldSeed = testSeed;
-        debug && console.log('Seed: ' + worldSeed);
+        //debug && console.log('Seed: ' + worldSeed);
         
         generateParallaxTexture();
         generateColorBandTexture();
@@ -189,10 +189,10 @@ class World extends EngineObject
         }
 
         if (gameMode == 0 && !titleScreen && !gameOverTimer.isSet())
-        if (saveData.farthestDistanceClassic > 0)
+        if (saveData.bestDistanceClassic > 0)
         {
             // draw line where record is
-            drawRect(vec2(saveData.farthestDistanceClassic,0), vec2(.5,1e4), hsl(0,1,.5,.5));
+            drawRect(vec2(saveData.bestDistanceClassic,0), vec2(.5,1e4), hsl(0,1,.5,.5));
         }
     }
 
