@@ -54,6 +54,7 @@ let testStore;
 let menuCats;
 let testMakeThumbnail;
 let testGodMode;
+let hideHud;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -310,6 +311,13 @@ function gameUpdate()
         if (keyWasPressed('KeyM'))
         {
             saveData.coins = 1e5;
+            writeSaveData();
+        }
+        if (keyWasPressed('KeyU'))
+        {
+            // unlock all cats
+            for(let i=catCount;i--;)
+                saveData.cats[i] = 1;
             writeSaveData();
         }
     }

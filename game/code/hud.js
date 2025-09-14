@@ -173,7 +173,7 @@ function createStoreUI()
             ASSERT(menuCat)
             if (menuCat)
             {
-                menuCat.pos = worldPos.add(vec2(.1,owned ? -.1:.1));
+                menuCat.pos = worldPos.add(vec2(.1,owned ? 0:.1));
                 menuCat.pos.y += menuCat.size.y/2;
                 menuCat.renderHack();
             }
@@ -183,20 +183,48 @@ function createStoreUI()
 
             if (!owned)
             {
-                const textPos = this.pos.add(vec2(.75,.6).multiply(textSize));
+                const textPos = this.pos.add(vec2(.7,.6).multiply(textSize));
                 const shadowPos = textPos.add(vec2(5,5));
                 const color = saveData.coins < this.cost ? RED : WHITE;
                 drawUIText(this.cost, shadowPos, textSize, BLACK, 0, undefined, 'right', this.font);
                 drawUIText(this.cost, textPos, textSize, color, 0, undefined, 'right', this.font);
                 drawCoinPickup(worldPos.add(vec2(-.8,-.7)), vec2(1), undefined, undefined, time/4);
             }
-            if (isActiveCat)
+            if (isActiveCat && !enhancedMode)
             {
                 const textSize = vec2(this.size.x*.9, this.size.y*.4);
                 const textPos = this.pos.add(vec2(0,.8).multiply(textSize));
                 const shadowPos = textPos.add(vec2(5,5));
                 drawUIText('Selected', shadowPos, textSize, BLACK, 0, undefined, 'center', this.font);
                 drawUIText('Selected', textPos, textSize, WHITE, 0, undefined, 'center', this.font);
+            }
+            else if (enhancedMode && owned)
+            {
+                const catNames = 
+                [
+                    'Triska', 
+                    'Joe', 
+                    'Tiger', 
+                    'Princess', 
+                    'Oreo',
+                    'Rusty',
+                    'Skye',
+                    'Dini',
+                    'Chonk',
+                    'Zed',
+                    'Rosie',
+                    'Cheshire',
+                    'Hex',
+                ];
+
+                const name = catNames[this.catType] || '';
+                const textSize = vec2(this.size.x*.9, this.size.y*.35);
+                const textPos = this.pos.add(vec2(0,.8).multiply(textSize));
+                const shadowPos = textPos.add(vec2(5,5));
+                const color = isActiveCat ? WHITE : GRAY;
+                const shadowColor = BLACK;
+                drawUIText(name, shadowPos, textSize, shadowColor, 0, undefined, 'center', this.font);
+                drawUIText(name, textPos, textSize, color, 0, undefined, 'center', this.font);
             }
         }
         isOwned()
@@ -260,10 +288,15 @@ function createStoreUI()
 
 function updateGameUI()
 {
+    if (hideHud)
+    {
+        buttonPause.visible = buttonBack.visible = uiRoot.visible = 0;
+        return;
+    }
+
     const largeCorner = isTouchDevice || titleScreen || paused;
     const cornerMargin = largeCorner ? 40 : 20;
     const r = mainCanvasSize.y/uiNativeHeight;
-
     const buttonSizeSmall = vec2(largeCorner ? 200 : 99);
     buttonPause.size = buttonBack.size = buttonSizeSmall;
     buttonPause.cornerRadius = buttonBack.cornerRadius = buttonSizeSmall.x/3;
@@ -310,6 +343,9 @@ function updateGameUI()
 
 function drawHUD()
 {
+    if (hideHud)
+        return;
+
     const textSize = .1;
     const textColorWave = hsl(1,1,1,.5+Math.sin(time*3)/2);
     if (enhancedMode && !quickStart && !testTitleScreen && !testStore)
@@ -358,7 +394,7 @@ function drawHUD()
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
-    if (enhancedMode)
+    if (enhancedMode && !quickStart)
     {
         // show how to play if they havent played before
         const helpTime = 20;
