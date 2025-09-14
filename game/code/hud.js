@@ -5,7 +5,7 @@
 let uiRoot, uiMenu, uiStore;
 let buttonClassic, buttonRemix, buttonContinue, buttonStore;
 let uiTextBestTimeClassic, uiTextBestTimeRemix, uiTextContinueIsland;
-let buttonBack, buttonPause, storeButtons;
+let buttonBack, buttonPause, storeButtons, buttonWebsite;
 
 function createUI()
 {
@@ -62,9 +62,11 @@ function createUI()
         gameMode = saveData.lastMode;
         worldSeedContinue = saveData.lastSeed;
         gameStart();
-        player.pos.x = saveData.lastIsland * islandDistance + 20;
-        boostIslandID = saveData.lastIsland;
-        worldSeedContinue = 0;
+        player.pos.x = saveData.lastIsland * islandDistance-30;
+        player.pos.y = -20
+        saveData.lastIsland;
+        boostIslandID = worldSeedContinue = 0;
+        activeIslandID = saveData.lastIsland+1;
     }
 
     pos.x += buttonSize.x + spaceing;
@@ -99,7 +101,7 @@ function createUI()
                 drawUIRect(this.pos.add(vec2( 16,0)), vec2(16,60), color, 0, undefined, 0);
                 drawUIRect(this.pos.add(vec2(-16,0)), vec2(16,60), color, 0, undefined, 0);
             }
-            else
+            else if (!enhancedMode || this.type != 2)
             {
                 // back arrow
                 const points = [vec2(-30,0), vec2(20,30), vec2(20,-30)];
@@ -120,6 +122,16 @@ function createUI()
 
     buttonPause = new UICornerButton(1);
     buttonPause.onClick = ()=> setPaused(!paused);
+
+    if (enhancedMode)
+    {
+        buttonWebsite = new UICornerButton(2);
+        buttonWebsite.text = '?';
+        buttonWebsite.onClick = ()=>
+        {
+            open("https://github.com/KilledByAPixel/JS13K2025", "_blank", "noopener,noreferrer");
+        }
+    }
 }
 
 function createStoreUI()
@@ -314,6 +326,15 @@ function updateGameUI()
     if (enhancedMode && storeMode)
         buttonBack.pos = buttonPause.pos.copy();
 
+    if (enhancedMode)
+    {
+        buttonWebsite.visible = paused;
+        buttonWebsite.size = buttonSizeSmall;
+        buttonWebsite.pos.x = buttonBack.pos.x + buttonSizeSmall.x + 50
+        buttonWebsite.pos.y = buttonBack.pos.y;
+        buttonWebsite.cornerRadius = buttonBack.cornerRadius;
+    }
+
     // update menu visibility
     uiMenu.visible = titleScreen && !storeMode && !attractMode;
     buttonContinue.disabled = saveData.lastMode < 0; // only show continue if have a save
@@ -351,12 +372,12 @@ function drawHUD()
     if (enhancedMode && !quickStart && !testTitleScreen && !testStore)
     {
         // intro transition, black circle around center
-        const p = gameTimer;
+        const p = gameTimer*(titleScreen?.5:1);
         const count = 99;
         for(let i=count; p<1 && i--;)
         {
             const a = i/count*PI*2;
-            drawRect(cameraPos.add(vec2(p*15,0).rotate(a)), vec2(1,30), BLACK, a);
+            drawRect(cameraPos.add(vec2(p*30+8,0).rotate(a)), vec2(20,30), BLACK, a);
         }
     }
 
@@ -394,7 +415,7 @@ function drawHUD()
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
-    if (enhancedMode && !quickStart)
+    if (enhancedMode && !quickStart && !gameOverTimer.isSet() && !winTimer.isSet())
     {
         // show how to play if they havent played before
         const helpTime = 20;
@@ -456,7 +477,7 @@ function drawHUD()
 function drawTitleScreen()
 {
     const context = mainContext;
-    const titleScreenTime = testTitleScreen ? 5+time : time;
+    const titleScreenTime = testTitleScreen ? 5+gameTimer : gameTimer;
     const alpha = clamp(titleScreenTime/.5);
     const textSize = .1;
 
