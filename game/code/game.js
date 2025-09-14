@@ -361,7 +361,7 @@ function gameUpdatePost()
     {
         if (mouseWasPressed(0) && !uiObjectWasClicked)
             setPaused(0);
-        if (debug && keyWasPressed('KeyP'))
+        if (enhancedMode && keyWasPressed('KeyP'))
             setPaused(!paused);
         if (keyWasPressed('Escape'))
         {
