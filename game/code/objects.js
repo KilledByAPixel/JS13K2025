@@ -130,7 +130,7 @@ function drawCoinPickup(pos, size, color1=hsl(.65,1,.5), color2=hsl(.15,1,.7), a
     const tileInfo = spriteAtlas.circle;
     const backColor = rgb(1,1,1,.3);
     for(let i=5; i--;)
-        drawTile(pos, size.scale(.2+i/5), tileInfo, backColor, a, 0, undefined, 1, screenSpace);
+        drawTile(pos, size.scale(.2+i/5), tileInfo, backColor, 0, 0, undefined, 1, screenSpace);
     for(let i=3; i--;)
         drawTile(pos,  vec2(.8,.3).multiply(size), tileInfo, color1, i/3*PI+a, 0, undefined, 1, screenSpace);
     drawTile(pos, size.scale(.3), spriteAtlas.circleSmall, color2, a, 0, undefined, 1, screenSpace);
