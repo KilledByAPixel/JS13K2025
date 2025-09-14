@@ -312,10 +312,10 @@ function drawHUD()
 {
     const textSize = .1;
     const textColorWave = hsl(1,1,1,.5+Math.sin(time*3)/2);
-    if (!quickStart && !testTitleScreen && !testStore && !isJS13KBuild)
+    if (enhancedMode && !quickStart && !testTitleScreen && !testStore)
     {
         // intro transition, black circle around center
-        const p = gameTimer*2;
+        const p = gameTimer;
         const count = 99;
         for(let i=count; p<1 && i--;)
         {
