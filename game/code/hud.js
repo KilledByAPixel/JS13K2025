@@ -241,7 +241,9 @@ function createStoreUI()
     storeButtons = [];
     for(let i=catCount; i--;)
     {
-        const j =i+2-(i<9) ; // shift over to make 13 fit
+        const j = enhancedMode ? (i < 4 ? i : i>8 ? i+2 : i+1) :
+             i+2-(i<9) ; // shift over to make 13 fit
+
         const col = j%columns;
         const row = (j/columns)|0;
         const pos = vec2((col - (columns-1)/2)*buttonSize.x*1.15, 
@@ -275,7 +277,10 @@ function updateGameUI()
     // corner back button
     buttonBack.visible = paused && !titleScreen || storeMode; // only show back button in game
     buttonBack.pos.x = buttonBack.size.x/2 + cornerMargin-mainCanvasSize.x/2/r;
-    
+
+    if (enhancedMode && storeMode)
+        buttonBack.pos = buttonPause.pos.copy();
+
     // update menu visibility
     uiMenu.visible = titleScreen && !storeMode && !attractMode;
     buttonContinue.disabled = saveData.lastMode < 0; // only show continue if have a save
@@ -427,8 +432,8 @@ function drawTitleScreen()
         return;
     }
         
-    if (!isJS13KBuild && attractMode && !testMakeThumbnail)
-        drawTextShadow(`Click To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-2)));
+    if (enhancedMode && attractMode && !testMakeThumbnail)
+        drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-2)));
 
     for(let j=2;j--;) // top and bottom rows of text
     {
