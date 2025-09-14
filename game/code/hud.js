@@ -349,7 +349,7 @@ function drawHUD()
     }
 
     if (paused)
-        drawTextShadow('Pawsed', vec2(.5, .94), textSize, WHITE);
+        drawTextShadow(enhancedMode?'-Pawsed-':'Pawsed', vec2(.5, .94), textSize, WHITE);
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
