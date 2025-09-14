@@ -271,6 +271,7 @@ function engineInit()
         //'display:flex;' +             // use flexbox
         //'align-items:center;' +       // horizontal center
        // 'justify-content:center;' +   // vertical center
+        'overflow:hidden;' +          // fix scrollbars showing up sometimes
         'background:#000;' +          // set background color
         //'image-rendering:pixelated;' + // pixel art
         'user-select:none;' +         // prevent hold to select
