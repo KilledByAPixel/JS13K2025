@@ -379,6 +379,7 @@ class Player extends EngineObject
         if (isOnGround)
             this.velocity.x *= .9999; // ground resistance
 
+        const noisePos = enhancedMode ? time/2+1e5 : time/2;
         if (titleScreen || gameOver)
             this.velocity.x = 0;
         if (hasWon)
@@ -387,7 +388,7 @@ class Player extends EngineObject
             const p1 = percent(winTimer,3,winTimeFlyAway);
             const p2 = percent(winTimer,0,3);
             this.velocity.x = lerp(p1, .1, .5);
-            this.pos.y = lerp(p2, this.pos.y, 9 + noise1D(time/2)*2);
+            this.pos.y = lerp(p2, this.pos.y, 9 + noise1D(noisePos)*2);
             this.gravityScale = 0;
         }
 
@@ -395,12 +396,16 @@ class Player extends EngineObject
         const isCloseToGround = this.airTimer<.15;
         const isStill = this.velocity.length() < .01;
         const endFlips = this.catType == 6;
-        const targetAngle = hasWon ? endFlips ? winTimer*9 :noise1D(time/2)*.2-.1 :
+        const targetAngle = hasWon ? endFlips ? winTimer*9 :noise1D(noisePos)*.2-.1 :
             isStill || titleScreen || gameOver? 0 : isPushingDown && !isCloseToGround ? 0 : this.velocity.angle() - PI/2;
         this.angle = lerp(.1, this.angle, targetAngle, 2*PI);
 
         // head animation
-        const headAngleTarget = gameOver || titleScreen ? -noise1D(time/2)*.3+.1 : isPushingDown ? isOnGround ? Math.sin(this.pos.x*2)*.3 : -.1 : 0;
+        const headAngleTarget = gameOver || titleScreen ? -noise1D(noisePos)*.3+.1 : 
+            isOnGround ? Math.sin(this.pos.x*2)*.3 : // ground head
+            isPushingDown ? .3 : 0; // air head
+        
+       // isPushingDown ? isOnGround ? -.3 : .3 : Math.sin(this.pos.x*2)*.3;
         this.headAngle = lerp(.1, this.headAngle, headAngleTarget);
 
         // legs animation
