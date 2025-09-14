@@ -402,8 +402,7 @@ function drawHUD()
         {
             const p = gameTimer < 3 ? percent(gameTimer, 3, 1) : percent(gameTimer, helpTime-3, helpTime);
             const color = hsl(0,0,1,1-p);
-        
-            drawTextShadow('Use only one button to play.\nHold to push down and gain speed.', vec2(.5, .33), .1, color, 'center', undefined, 1.5);
+            drawTextShadow('Use only one button to play!\nHold on down slopes to gain speed.', vec2(.5, .33), .1, color, 'center', undefined, 1.5);
         }
     }
 
@@ -469,7 +468,15 @@ function drawTitleScreen()
     }
         
     if (enhancedMode && attractMode && !testMakeThumbnail)
-        drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-2)));
+    {
+        const color1 = hsl(1,1,1,clamp(titleScreenTime-2));
+        drawTextShadow(`A Game By Frank Force`, vec2(.5, .58), .1, color1);
+        const color2 = hsl(1,1,1,clamp(titleScreenTime-4));
+        drawTextShadow(`Made for JS13K 2025`, vec2(.5, .68), .1, color2);
+    }
+        
+    if (enhancedMode && attractMode && !testMakeThumbnail)
+        drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-6)));
 
     for(let j=2;j--;) // top and bottom rows of text
     {
