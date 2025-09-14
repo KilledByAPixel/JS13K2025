@@ -10,13 +10,14 @@
 
 'use strict';
 
+const enhancedMode = 1; // enhanced mode is larger and has more features
 const isJS13KBuild = 1; // special flag to make js13k smaller
 
 /** True if debug is enabled
  *  @type {Boolean}
  *  @default
  *  @memberof Debug */
-const debug = true;
+let debug = true;
 
 /** True if asserts are enabled
  *  @type {Boolean}
@@ -34,7 +35,7 @@ const debugPointSize = .5;
  *  @type {Boolean}
  *  @default
  *  @memberof Debug */
-let showWatermark = true;
+let showWatermark = false;
 
 /** Key code used to toggle debug mode, Esc by default
  *  @type {String}

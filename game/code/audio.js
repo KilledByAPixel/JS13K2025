@@ -38,7 +38,7 @@ function musicUpdate()
     if (beatCount%32==0) // set new chord
     {
         bassNote = pianoNote = chordNote = beatCount%256 ? chordNote + randSign() : 0;
-        debug && console.log('chord',  chordNote, scale[mod(chordNote,  scale.length)]);
+        //debug && console.log('chord',  chordNote, scale[mod(chordNote,  scale.length)]);
     }
 
     // hat

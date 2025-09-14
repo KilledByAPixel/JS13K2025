@@ -353,6 +353,19 @@ function drawHUD()
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
+    if (enhancedMode)
+    {
+        // show how to play if they havent played before
+        const helpTime = 20;
+        if (gameTimer < helpTime && !gameMode && !gameContinued)
+        {
+            const p = gameTimer < 3 ? percent(gameTimer, 3, 1) : percent(gameTimer, helpTime-3, helpTime);
+            const color = hsl(0,0,1,1-p);
+        
+            drawTextShadow('Use only one button to play.\nHold to push down and gain speed.', vec2(.5, .33), .1, color, 'center', undefined, 1.5);
+        }
+    }
+
     if (winTimer.isSet())
     {
         drawTextShadow('You Win!', vec2(.5, .44), .15, textColorWave);
