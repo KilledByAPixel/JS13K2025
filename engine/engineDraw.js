@@ -382,6 +382,9 @@ function drawText(text, pos, size=1, color, lineWidth=0, lineColor, textAlign, f
  *  @memberof Draw */
 function drawTextScreen(text, pos, size=1, color=new Color, lineWidth=0, lineColor=new Color(0,0,0), textAlign='center', font=fontDefault, maxWidth=undefined)
 {
+    if (enhancedMode && color.a <= 0 && (!lineWidth || lineColor.a <= 0))
+        return; // optimize if alpha is 0
+
     const context = mainContext;
     context.fillStyle = color.toString();
     context.strokeStyle = lineColor.toString();
