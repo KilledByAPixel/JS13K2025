@@ -2,7 +2,7 @@
   "compilerOptions": {
   },
   "include": [
-    "./src/*.js",
+    "./engine/*.js",
     "./plugins/*.js",
     "./game/*.js",
     "./game/code/*.js",
