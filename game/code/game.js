@@ -84,8 +84,6 @@ function gameStart(isTitleScreen)
     gameOverTimer.unset(); // time in game over screen
     winTimer.unset();      // time in win screen
     gameContinued = !!worldSeedContinue; // set if continuing from a save
-    if (!gameContinued && !isTitleScreen)
-        saveData.lastMode = -1; // reset last mode if new game
 
     // start in attract mode if title screen
     attractMode = titleScreen && !testTitleScreen && !testStore && !testAutoplay;
@@ -108,7 +106,7 @@ function gameInit()
     if (testStore)
         quickStart = 0;
     //mainCanvas.style.imageRendering = 'auto'; // smoother rendering for overlay text
-    debug && console.log(gameName + ' v' + gameVersion + ' by Frank Force');
+    enhancedMode && console.log(gameName + ' v' + gameVersion + ' by Frank Force');
     if (autoPause)
     {
         onblur = ()=>
