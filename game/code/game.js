@@ -88,7 +88,8 @@ function gameStart(isTitleScreen)
 
     // start in attract mode if title screen
     attractMode = titleScreen && !testTitleScreen && !testStore && !testAutoplay;
-    storeMode = 0;
+    if (!testStore)
+        storeMode = 0;
 
     world = new World;
     player = new Player(saveData.selectedCatType);
