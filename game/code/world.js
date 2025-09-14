@@ -68,7 +68,7 @@ class World extends EngineObject
     {
         const backgroundIsland = cameraPos.x/islandDistance-.5|0;
         {
-            // island sky background fade bands
+            // island sky backgsround fade bands
             const backgroundSize = vec2(islandDistance, 2e3);
             const bandCount = 50;
             const pos = vec2();
@@ -99,11 +99,11 @@ class World extends EngineObject
             const sunSize = lerp(timeOfDay,2,1)*(2 + Math.sin(time*2)*.1);
             const sunPos = vec2(w*lerp(timeOfDay,-.5,.5),lerp(timeOfDay,-3,6));
             const sunHue = timeOfDay*.15;
-            const sunRayBrightness = timeOfDay * .03;
+            const sunRayBrightness = timeOfDay * .04;
             setBlendMode(1)
             for(let i=0; i<8; i++)
             {
-                drawRect(cameraPos.add(sunPos), vec2(sunSize), hsl(sunHue,.9,.5,.1), i*PI/8+time/9);
+                drawRect(cameraPos.add(sunPos), vec2(sunSize), hsl(sunHue,.9,.5,.2), i*PI/8+time/9);
                 drawRect(cameraPos.add(sunPos), vec2(.25,90).scale(sunSize), hsl(sunHue,.9,sunRayBrightness), i*PI/8+time/9);
             }
             // red overlay
