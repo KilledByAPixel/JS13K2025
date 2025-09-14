@@ -164,7 +164,7 @@ function createStoreUI()
 
             // background
             const canAfford = saveData.coins >= this.cost;
-            const backgroundSize = vec2(2.7,2.8)
+            const backgroundSize = vec2(2.7,2.75)
             drawRect(worldPos, backgroundSize, isActiveCat ? CYAN :
             owned ? this.mouseIsOver ? YELLOW : WHITE : this.mouseIsOver ? canAfford ? YELLOW : RED : hsl(0,0,.2));
 
