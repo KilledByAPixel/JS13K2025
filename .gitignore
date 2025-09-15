@@ -1,0 +1,6 @@
+# node files
+node_modules
+
+# example builds
+game/build
+game/stuff
