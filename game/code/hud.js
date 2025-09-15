@@ -415,7 +415,8 @@ function drawHUD()
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
-    if (enhancedMode && !quickStart && !gameOverTimer.isSet() && !winTimer.isSet())
+    if (enhancedMode && !quickStart)
+    if (!saveData.remixUnlocked && !gameOverTimer.isSet() && !winTimer.isSet())
     {
         // show how to play if they havent played before
         const helpTime = 20;

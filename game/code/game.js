@@ -226,8 +226,8 @@ function gameUpdate()
                     winTimer.set();
                     saveData.lastMode = -1; // beat game, so no continue
                     saveData.remixUnlocked = 1; // unlock remix mode
-                    if (gameMode == 0) // only save distance in classic mode
-                        saveData.bestDistanceClassic = -1; // dont show distance again
+                    if (gameMode == 0 && !gameContinued) // only save distance in classic mode
+                        saveData.bestDistanceClassic = -1; // dont show distance again after player wins
                     if (!gameContinued)
                     {
                         // only save best time if not continued from a save
@@ -261,6 +261,7 @@ function gameUpdate()
                 }
             }
 
+            if (gameMode == 0 && !gameContinued)
             if (player.pos.x > saveData.bestDistanceClassic && !newDistanceRecord)
             {
                 // new record distance!
@@ -280,13 +281,11 @@ function gameUpdate()
                 timeLeft = 0;
                 gameOverTimer.set();
                 sound_gameOver.play();
-                if (gameMode == 0) // only save distance in classic mode
+                if (gameMode == 0 && !gameContinued)
+                if (player.pos.x > saveData.bestDistanceClassic)
                 {
-                    if (player.pos.x > saveData.bestDistanceClassic)
-                    {
-                        // new record distance!
-                        saveData.bestDistanceClassic = player.pos.x;
-                    }
+                    // new record distance!
+                    saveData.bestDistanceClassic = player.pos.x;
                 }
                 writeSaveData();
             }

@@ -188,7 +188,8 @@ class World extends EngineObject
             }
         }
 
-        if (gameMode == 0 && !titleScreen && !gameOverTimer.isSet())
+        if (gameMode == 0 && !gameContinued)
+        if (!titleScreen && !gameOverTimer.isSet())
         if (saveData.bestDistanceClassic > 0)
         {
             // draw line where record is
