@@ -38,3 +38,5 @@ Made by Frank Force for JS13K 2025
 
 This game is dedicated to my cat Baldy, 
 a black cat who always brought me good luck. 
+
+![Cat Favicon](/game/favicon.png)
