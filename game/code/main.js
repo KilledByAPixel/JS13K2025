@@ -54,7 +54,7 @@ if (debug)
     //testLevelView=1
     //testRandomize=1
     //testNoRamps=1;
-   //testAutoplay=1;
+    //testAutoplay=1;
     //testTitleScreen=1
     //testSeed = 90
     //testStore = 1;
