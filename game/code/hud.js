@@ -63,8 +63,7 @@ function createUI()
         worldSeedContinue = saveData.lastSeed;
         gameStart();
         player.pos.x = saveData.lastIsland * islandDistance-30;
-        player.pos.y = -20
-        saveData.lastIsland;
+        player.pos.y = -20;
         boostIslandID = worldSeedContinue = 0;
         activeIslandID = saveData.lastIsland+1;
     }

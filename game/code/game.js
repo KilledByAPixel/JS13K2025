@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.12';
+const gameVersion = '1.13';
 
 debugShowErrors();
 
@@ -178,9 +178,22 @@ function gameUpdate()
         // update game controls
         if (keyWasPressed('KeyR'))
         {
-            // restart
-            gameStart();
             sound_gameOver.play();
+            if (enhancedMode && gameContinued)
+            {
+                // continue from save
+                worldSeedContinue = saveData.lastSeed;
+                gameStart();
+                player.pos.x = saveData.lastIsland * islandDistance-30;
+                player.pos.y = -20;
+                boostIslandID = worldSeedContinue = 0;
+                activeIslandID = saveData.lastIsland+1;
+            }
+            else
+            {
+                // restart
+                gameStart();
+            }
         }
         
         if (gameOverTimer.isSet())
@@ -231,6 +244,7 @@ function gameUpdate()
                     winTimer.set();
                     saveData.lastMode = -1; // beat game, so no continue
                     saveData.remixUnlocked = 1; // unlock remix mode
+                    if (enhancedMode)
                     if (gameMode == 0 && !gameContinued) // only save distance in classic mode
                         saveData.bestDistanceClassic = -1; // dont show distance again after player wins
                     if (!gameContinued)
@@ -274,6 +288,7 @@ function gameUpdate()
                 }
             }
 
+            if (enhancedMode)
             if (gameMode == 0 && !gameContinued)
             if (player.pos.x > saveData.bestDistanceClassic && !newDistanceRecord)
             {
@@ -294,6 +309,7 @@ function gameUpdate()
                 timeLeft = 0;
                 gameOverTimer.set();
                 sound_gameOver.play();
+                if (enhancedMode)
                 if (gameMode == 0 && !gameContinued)
                 if (player.pos.x > saveData.bestDistanceClassic)
                 {
@@ -304,7 +320,17 @@ function gameUpdate()
             }
         }
     }
-        
+    
+    if (enhancedMode)
+    {
+        if (keyWasPressed('KeyM'))
+        {
+            const soundEnabled = soundEnable;
+            soundEnable = 1;
+            sound_select.play(.5, soundEnabled? 2 : 1);
+            soundEnable = !soundEnabled;
+        }
+    }
     if (debug)
     {
         if (keyWasPressed('KeyT'))
@@ -318,7 +344,7 @@ function gameUpdate()
             // test game over
             timeLeft = 0;
         }
-        if (keyWasPressed('KeyM'))
+        if (keyWasPressed('KeyN'))
         {
             saveData.coins = 1e5;
             writeSaveData();
@@ -479,7 +505,8 @@ let saveData;
     saveData.lastIsland = parseInt(saveData.lastIsland);
     saveData.lastSeed = parseInt(saveData.lastSeed);
     saveData.remixUnlocked = parseInt(saveData.remixUnlocked);
-    saveData.bestDistanceClassic = parseFloat(saveData.bestDistanceClassic) || 0;
+    if (enhancedMode)
+        saveData.bestDistanceClassic = parseFloat(saveData.bestDistanceClassic) || 0;
     saveData.bestTimeClassic = parseFloat(saveData.bestTimeClassic) || 0;
     saveData.bestTimeRemix = parseFloat(saveData.bestTimeRemix) || 0;
     saveData.selectedCatType = parseInt(saveData.selectedCatType) || 0;

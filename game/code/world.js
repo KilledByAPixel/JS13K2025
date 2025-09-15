@@ -99,12 +99,12 @@ class World extends EngineObject
             const sunSize = lerp(timeOfDay,2,1)*(2 + Math.sin(time*2)*.1);
             const sunPos = vec2(w*lerp(timeOfDay,-.5,.5),lerp(timeOfDay,-3,6));
             const sunHue = timeOfDay*.15;
-            const sunRayBrightness = timeOfDay * .04;
+            const sunRayBrightness = lerp(timeOfDay,.06,.03);
             setBlendMode(1)
             for(let i=0; i<8; i++)
             {
                 drawRect(cameraPos.add(sunPos), vec2(sunSize), hsl(sunHue,.9,.5,.2), i*PI/8+time/9);
-                drawRect(cameraPos.add(sunPos), vec2(.25,90).scale(sunSize), hsl(sunHue,.9,sunRayBrightness), i*PI/8+time/9);
+                drawRect(cameraPos.add(sunPos), vec2(.25,99).scale(sunSize), hsl(sunHue,.9,sunRayBrightness), i*PI/8+time/9);
             }
             // red overlay
             drawRect(cameraPos, vec2(1e3), hsl(0,1,(1-timeOfDay)*.5));
@@ -188,6 +188,7 @@ class World extends EngineObject
             }
         }
 
+        if (enhancedMode)
         if (gameMode == 0 && !gameContinued)
         if (!titleScreen && !gameOverTimer.isSet())
         if (saveData.bestDistanceClassic > 0)
