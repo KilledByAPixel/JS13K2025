@@ -33,6 +33,7 @@ class Player extends EngineObject
         this.bubbleTimer = new Timer;
         this.jumpTimer = new Timer;
         this.isMenuCat = isMenuCat;
+        this.airTimer.set();
         this.meowCount = 0;
         
         /*this.trailParticles = new ParticleEmitter(
