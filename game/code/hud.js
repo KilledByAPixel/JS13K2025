@@ -447,11 +447,13 @@ function drawHUD()
         const timeColor = timeLeft < 5 ? RED : WHITE; // warning time
         drawTextShadow(timeLeft.toFixed(1), vec2(.99, .94), .1, timeColor, 'right');
 
-        // show time and distance
-        if (debug)
+        // show time in corner if player has beat that mode and not continuing
+        if (enhancedMode && !paused && !gameOverTimer.isSet() && !winTimer.isSet())
         {
-            drawTextShadow(formatTimeString(gameTimer), vec2(.01, .04), .05, WHITE, 'left');
-            drawTextShadow(player.pos.x.toFixed(1), vec2(.01, .09), .05, WHITE, 'left');
+            const hasWon = gameMode == 0 && saveData.bestTimeClassic ||
+                gameMode == 1 && saveData.bestTimeRemix;
+            if (hasWon && !gameContinued)
+                drawTextShadow(formatTimeString(gameTimer), vec2(.01, .04), .05, WHITE, 'left');
         }
 
         const islandFade = 2;
