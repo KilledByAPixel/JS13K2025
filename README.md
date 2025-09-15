@@ -34,6 +34,13 @@ Made by Frank Force for JS13K 2025
 - R = Restart
 - Escape = Back
 
+## 🦁 Enhanced Mode
+- This version has a few extra features not in the js13k build including...
+- How to play displayed on start
+- Names for all 13 cats
+- Improved UI
+- Some bug fixes
+
 # [Donate Cryptocurrency to Help Homeless Pets!](https://bestfriends.org/donate/cryptocurrency-donations)
 
 This game is dedicated to my cat Baldy, 
