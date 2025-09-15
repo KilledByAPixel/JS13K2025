@@ -30,8 +30,9 @@ Made by Frank Force for JS13K 2025
 - Collect flowers to buy more cats
 
 ## 🐈 Controls
-- Space, Mouse, or Touch = Push Down
+- Mouse or Spacebar = Push Down
 - R = Restart
+- M = Toggle Mute
 - Escape = Back
 
 ## 🦁 Enhanced Mode
