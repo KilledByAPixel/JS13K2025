@@ -282,7 +282,7 @@ class Player extends EngineObject
         const endBoost = this.endBoostTimer.active();
         const allowInput = !titleScreen && !gameOver && !hasWon && !endBoost && !testAutoplay;
 
-        let isPushingDown = (mouseIsDown(0) || keyIsDown('Space')) && allowInput;
+        let isPushingDown = (mouseIsDown(0) || keyIsDown('Space') || enhancedMode && keyIsDown('ArrowDown')) && allowInput;
         if (testAutoplay && !endBoost)
         {
             // todo: predict ground location
