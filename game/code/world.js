@@ -235,7 +235,7 @@ class World extends EngineObject
                 const n = getGroundNormal(x);
                 const size = random.float(.5,1);
                 let angle = n.angle();
-                const hue = island.sceneryHue + random.float(-.1,.1);//-tripMode*time/7;
+                const hue = island.sceneryHue + random.float(-.1,.1);
                 const color1 = hsl(hue,random.float(.5,.8),random.float(.3,.5));
                 const color2 = GRAY;
                 const type = island.sceneryType;

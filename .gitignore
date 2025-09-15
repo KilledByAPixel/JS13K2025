@@ -1,6 +1,8 @@
 # node files
 node_modules
 
-# example builds
+# work files
 game/build
 game/stuff
+notes.txt
+package-lock.json

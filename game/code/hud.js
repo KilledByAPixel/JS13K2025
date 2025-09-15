@@ -314,7 +314,7 @@ function updateGameUI()
     buttonPause.cornerRadius = buttonBack.cornerRadius = buttonSizeSmall.x/3;
     
     // corner pause button
-    buttonPause.visible = !titleScreen;
+    buttonPause.visible = !titleScreen && (paused || !winTimer.isSet() && !gameOverTimer.isSet());
     buttonPause.pos.x = (mainCanvasSize.x/2/r - buttonBack.size.x/2 - cornerMargin);
     buttonPause.pos.y = buttonBack.pos.y = buttonBack.size.y/2 + cornerMargin;
     buttonPause.color = paused ? YELLOW : uiDefaultButtonColor;
@@ -368,7 +368,6 @@ function drawHUD()
         return;
 
     const textSize = .1;
-    const textColorWave = hsl(1,1,1,.5+Math.sin(time*3)/2);
     if (enhancedMode && !quickStart && !testTitleScreen && !testStore)
     {
         // intro transition, black circle around center
@@ -427,18 +426,23 @@ function drawHUD()
             drawTextShadow('Use only one button to play!\nHold on down slopes to gain speed.', vec2(.5, .33), .1, color, 'center', undefined, 1.5);
         }
     }
-
     if (winTimer.isSet())
     {
-        drawTextShadow('You Win!', vec2(.5, .44), .15, textColorWave);
+        const alpha = enhancedMode ? winTimer.get()/2 : .5+Math.sin(time*3)/2;
+        const textColorWave = hsl(0,0,1,alpha);
+        drawTextShadow('You Win!', vec2(.5, .4), .15, textColorWave);
         if (lastWinTime)
         {
-            const time = formatTimeString(lastWinTime);
-            drawTextShadow(time, vec2(.5, .56), textSize, textColorWave);
+            const winTime = formatTimeString(lastWinTime);
+            drawTextShadow(winTime, vec2(.5, .52), textSize, textColorWave);
+            if (enhancedMode && newTimeRecord)
+                drawTextShadow('New Record!', vec2(.5, .62), textSize, hsl(0,1,.5,alpha));
         }
     }
     else if (gameOverTimer.isSet())
     {
+        const alpha = enhancedMode ? gameOverTimer.get()/2 : .5+Math.sin(time*3)/2;
+        const textColorWave = hsl(0,0,1,alpha);
         drawTextShadow('Game Over!', vec2(.5, .5), .15, textColorWave);
     }
     else
@@ -453,7 +457,7 @@ function drawHUD()
             const hasWon = gameMode == 0 && saveData.bestTimeClassic ||
                 gameMode == 1 && saveData.bestTimeRemix;
             if (hasWon && !gameContinued)
-                drawTextShadow(formatTimeString(gameTimer), vec2(.01, .04), .05, WHITE, 'left');
+                drawTextShadow(formatTimeString(gameTimer), vec2(.99, .86), .05, WHITE, 'right','monospace',.19);
         }
 
         const islandFade = 2;
@@ -490,17 +494,22 @@ function drawTitleScreen()
             drawTextShadow(`L1TTL3 PAWS STORE`, vec2(.5, .06), textSize);
         return;
     }
-        
-    if (enhancedMode && attractMode && !testMakeThumbnail)
+
+    if (enhancedMode)
     {
-        const color1 = hsl(1,1,1,clamp(titleScreenTime-2));
-        drawTextShadow(`A Game By Frank Force`, vec2(.5, .58), .1, color1);
-        const color2 = hsl(1,1,1,clamp(titleScreenTime-4));
-        drawTextShadow(`Made for JS13K 2025`, vec2(.5, .68), .1, color2);
-    }
+        drawTextShadow('v'+gameVersion, vec2(.99, .97), .05, hsl(1,1,1,.2*clamp(titleScreenTime-1)), 'right');
         
-    if (enhancedMode && attractMode && !testMakeThumbnail)
-        drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-6)));
+        if (attractMode && !testMakeThumbnail)
+        {
+            const color1 = hsl(1,1,1,clamp(titleScreenTime-2));
+            drawTextShadow(`A Game By Frank Force`, vec2(.5, .58), .1, color1);
+            const color2 = hsl(1,1,1,clamp(titleScreenTime-4));
+            drawTextShadow(`Made for JS13K 2025`, vec2(.5, .68), .1, color2);
+        }
+            
+        if (attractMode && !testMakeThumbnail)
+            drawTextShadow(`${isTouchDevice?'Touch':'Click'} To Play`, vec2(.5, .92), textSize, hsl(1,1,1,wave(.5)*clamp(titleScreenTime-6)));
+    }
 
     for(let j=2;j--;) // top and bottom rows of text
     {

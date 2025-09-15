@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.1';
+const gameVersion = '1.12';
 
 debugShowErrors();
 
@@ -31,7 +31,6 @@ let islandTimer = new Timer;
 let gameOverTimer = new Timer;
 let winTimer = new Timer;
 let activeIslandID, boostIslandID;
-//let tripMode;
 let autoPause = !isTouchDevice; // auto pause when focus is lost
 let timeLeft;
 let colorBandTextureInfo;
@@ -40,6 +39,7 @@ let worldSeedContinue;
 let storeMode;
 let lastWinTime;
 let newDistanceRecord;
+let newTimeRecord;
 
 // debug settings
 let testTitleScreen;
@@ -70,6 +70,8 @@ function gameStart(isTitleScreen)
     titleScreen = quickStart || testAutoplay ? 0 : isTitleScreen;
     timeLeft = 30;
     activeIslandID = boostIslandID = newDistanceRecord = lastWinTime = 0;
+    if (enhancedMode)
+        newTimeRecord = 0;
     if (testAutoplay)
         gameMode = 1; // remix mode
 
@@ -238,12 +240,20 @@ function gameUpdate()
                         if (gameMode == 0) // classic mode
                         {
                             if (lastWinTime < saveData.bestTimeClassic || !saveData.bestTimeClassic)
+                            {
                                 saveData.bestTimeClassic = lastWinTime; // new best time!
+                                if (enhancedMode)
+                                    newTimeRecord = 1;
+                            }
                         }
                         else if (gameMode == 1) // remix mode
                         {
                             if (lastWinTime < saveData.bestTimeRemix || !saveData.bestTimeRemix)
+                            {
                                 saveData.bestTimeRemix = lastWinTime; // new best time!
+                                if (enhancedMode)
+                                    newTimeRecord = 1;
+                            }
                         }
                     }
                     writeSaveData();
