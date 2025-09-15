@@ -63,6 +63,9 @@ function gameStart(isTitleScreen)
     paused = 0; // unpause at start
     engineObjectsDestroy();
 
+    if (quickStart)
+        gameMode = 0;
+
     // settings
     titleScreen = quickStart || testAutoplay ? 0 : isTitleScreen;
     timeLeft = 30;
