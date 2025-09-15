@@ -5,7 +5,7 @@ Made by Frank Force for JS13K 2025
 
 # [PLAY ENHANCED VERSION](https://killedbyapixel.github.io/JS13K2025/) - [OFFICIAL JS13K PAGE](https://js13kgames.com/2025/games/l1ttl3-paws)
 
-![L1TTL3 PAWS - A JS13k Game by Frank Force](/screenshot.png)
+![L1TTL3 PAWS - A JS13k Game by Frank Force](/game/screenshot.png)
 
 *This code is only for learning purposes and not intended to be redistributed!*
 
