@@ -35,11 +35,11 @@ Made by Frank Force for JS13K 2025
 - Escape = Back
 
 ## 🦁 Enhanced Mode
-- This version has a few extra features not in the js13k build including...
-- How to play displayed on start
-- Names for all 13 cats
-- Improved UI
-- Some bug fixes
+This version has a few extra features not in the js13k build including...
+- Info about how to play displayed on start
+- Names for all 13 cats shown in menu
+- Improved UI, fixed some minor bugs
+- Some visual bug fixes
 
 # [Donate Cryptocurrency to Help Homeless Pets!](https://bestfriends.org/donate/cryptocurrency-donations)
 
