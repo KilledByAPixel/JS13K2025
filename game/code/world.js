@@ -334,7 +334,7 @@ class World extends EngineObject
         }
         {
             // hills outline
-            const outlineStep = isTouchDevice ? .4 : .1; // less draw calls on mobile
+            const outlineStep = isTouchDevice ? .4 : .2; // less draw calls on mobile
             const width = .2;
             let p = vec2(), s = vec2(width);
             for(let i=xStart/outlineStep|0; i<xEnd/outlineStep; ++i)
