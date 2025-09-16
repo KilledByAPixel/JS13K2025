@@ -501,9 +501,9 @@ function drawTitleScreen()
         if (attractMode && !testMakeThumbnail)
         {
             const color1 = hsl(1,1,1,clamp(titleScreenTime-2));
-            drawTextShadow(`A Game By Frank Force`, vec2(.5, .58), .1, color1);
+            drawTextShadow(`A Game By Frank Force`, vec2(.5, .58), .08, color1);
             const color2 = hsl(1,1,1,clamp(titleScreenTime-4));
-            drawTextShadow(`Made for JS13K 2025`, vec2(.5, .68), .1, color2);
+            drawTextShadow(`Made for JS13K 2025`, vec2(.5, .66), .08, color2);
         }
             
         if (attractMode && !testMakeThumbnail)
