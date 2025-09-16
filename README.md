@@ -42,6 +42,15 @@ This version has a few extra features not in the js13k build including...
 - Improved UI, fixed some minor bugs
 - Some visual bug fixes
 
+## 🧶 Tools
+This game was made using open source tools...
+- [LittleJS](https://github.com/KilledByAPixel/LittleJS)  - Game engine and rendering system
+- [ZzFX](https://github.com/KilledByAPixel/ZzFX) - Sound effects and music
+- [Google Closure](https://github.com/google/closure-compiler) - Minification
+- [UglifyJS](https://github.com/mishoo/UglifyJS) - Minification
+- [Roadroller](https://github.com/lifthrasiir/roadroller) - Smaller zip size
+- [ECT](https://github.com/fhanau/Efficient-Compression-Tool) - Zip compression
+
 # [Donate Cryptocurrency to Help Homeless Pets!](https://bestfriends.org/donate/cryptocurrency-donations)
 
 This game is dedicated to my cat Baldy, 
