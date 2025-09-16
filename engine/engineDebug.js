@@ -463,3 +463,69 @@ function debugRender()
         mainContext.restore();
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+let videoRecorder, videoRecorderTrack, videoCaptureCanvas;
+
+function videoCaptureUpdate()
+{
+    if (enhancedMode && debug && videoRecorderTrack)
+    {
+        // composite the canvases
+        const context = videoCaptureCanvas.getContext('2d');
+        glCopyToContext(context, true);
+        context.drawImage(mainCanvas, 0, 0);
+        videoRecorderTrack.requestFrame();
+    }
+}
+
+function videoCaptureStart()
+{
+    if (!enhancedMode || videoRecorder)
+        return; // already recording
+
+    if (!videoCaptureCanvas)
+    {
+        // create compositing canvas
+        videoCaptureCanvas = document.createElement('canvas');
+    }
+
+    videoCaptureCanvas.width = mainCanvas.width;
+    videoCaptureCanvas.height = mainCanvas.height;
+
+    // captureStream passing in 0 to only capture when requestFrame() is called
+    const stream = videoCaptureCanvas.captureStream(0);
+    const chunks = [];
+    videoRecorderTrack = stream.getVideoTracks()[0];
+    videoRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
+    videoRecorder.ondataavailable = e => chunks.push(e.data);
+    videoRecorder.onstop = () =>
+    {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'capture.webm';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // connect to audio
+    const audioStreamDestination = audioContext.createMediaStreamDestination();
+    audioGainNode.connect(audioStreamDestination);
+    for (const track of audioStreamDestination.stream.getAudioTracks())
+        stream.addTrack(track); // add audio track to videos track
+
+    // start recording
+    videoRecorder.start();
+}
+
+function videoCaptureStop()
+{
+    if (!enhancedMode || !videoRecorder)
+        return;
+
+    videoRecorder.stop();
+    videoRecorder = 0;
+}

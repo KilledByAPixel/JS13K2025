@@ -19,17 +19,17 @@ let audioContext = new AudioContext;
 /** Master gain node for all audio to pass through
  *  @type {GainNode}
  *  @memberof Audio */
-//let audioGainNode;
+let audioGainNode;
 
-/*function audioInit()
+function audioInit()
 {
-    if (!soundEnable || headlessMode) return;
+    if (!enhancedMode || !soundEnable || headlessMode) return;
     
     // (createGain is more widely supported then GainNode constructor)
     audioGainNode = audioContext.createGain();
     audioGainNode.connect(audioContext.destination);
     audioGainNode.gain.value = soundVolume; // set starting value
-}*/
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -268,8 +268,16 @@ function playSamples(sampleChannels, volume=1, rate=1, loop=false)
 
     // create and connect gain node
     const gainNode = audioContext.createGain();
-    gainNode.gain.value = volume*soundVolume;
-    gainNode.connect(audioContext.destination);
+    if (enhancedMode)
+    {
+        gainNode.gain.value = volume;
+        gainNode.connect(audioGainNode);
+    }
+    else
+    {
+        gainNode.gain.value = volume*soundVolume;
+        gainNode.connect(audioContext.destination);
+    }
 
     // connect source to gain
     source.connect(gainNode);

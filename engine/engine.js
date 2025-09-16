@@ -134,6 +134,8 @@ function engineInit()
         frameTimeBufferMS += paused ? 0 : frameTimeDeltaMS;
         if (!debugSpeedUp)
             frameTimeBufferMS = min(frameTimeBufferMS, 50); // clamp in case of slow framerate
+        if (enhancedMode && videoRecorder)
+            frameTimeBufferMS = 0; // no time smoothing when capturing video
 
         updateCanvas();
 
@@ -223,6 +225,7 @@ function engineInit()
             }
         }
 
+        videoCaptureUpdate();
         requestAnimationFrame(engineUpdate);
     }
 
@@ -285,7 +288,7 @@ function engineInit()
 
     // init stuff and start engine
     inputInit();
-    //audioInit();
+    audioInit();
     debugInit();
     glInit();
 
