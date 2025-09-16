@@ -48,10 +48,10 @@ class Island
         this.sceneryHue = this.hue + random.floatSign(.1,.2);
 
         const difficulty = percent(id, 0, islandCount-1);
-        this.waveRate1 = random.float(.35,.45) + difficulty * random.float(-.05,.05);
+        this.waveRate1 = random.float(.3,.4) + difficulty * random.float(-.05,.05);
         this.waveScale1 = random.float(1.5,2) + difficulty*random.float(-.2,.2);
-        this.waveRate2 = difficulty * random.float(.1,.3);
-        this.waveScale2 = difficulty * random.float(.8,1.3);
+        this.waveRate2 = .05 + difficulty * random.float(.1,.3);
+        this.waveScale2 = .3 + difficulty * random.float(.5,1);
         this.noiseScale = .5 + difficulty * random.float(.5,1.5);
         this.noiseRate = .005 + difficulty * random.float(.02,.04);
         this.lineColor = hsl(this.hue + random.floatSign(.1,.3),.2,.2);
@@ -87,9 +87,9 @@ function generateWorld()
 
     // create track
     const trackLength = islandDistance*islandCount*trackResolution;
-    const wavePos1 = random.float(1e4);
-    const wavePos2 = random.float(1e4);
-    const noisePos = random.float(1e4);
+    const wavePos1 = 0;
+    const wavePos2 = random.float(1e4,1e6);
+    const noisePos = random.float(1e4,1e6);
     let rampEndBottom = 0;
     track = [];
 
