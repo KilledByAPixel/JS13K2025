@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.13';
+const gameVersion = '1.14';
 
 debugShowErrors();
 
@@ -298,7 +298,15 @@ function gameUpdate()
             }
         
             // update game time  
+            const lastTimeLeft = timeLeft;
             timeLeft -= timeDelta;
+            if (enhancedMode)
+            if ((timeLeft|0) != (lastTimeLeft|0))
+            if (timeLeft < 5)
+            {
+                // low time warning
+                piano.playNote(12,.5);
+            }
             if (testGodMode)
                 timeLeft = max(timeLeft,1);
             //if (testAutoplay && timeLeft < 10)
@@ -355,6 +363,20 @@ function gameUpdate()
             for(let i=catCount;i--;)
                 saveData.cats[i] = 1;
             writeSaveData();
+        }
+        if (keyWasPressed('KeyV'))
+        {
+            // capture video
+            if (videoRecorder)
+            {
+                console.log('Video capture stopped');
+                videoCaptureStop();
+            }
+            else
+            {
+                console.log('Video capture started');
+                videoCaptureStart();
+            }
         }
     }
 
