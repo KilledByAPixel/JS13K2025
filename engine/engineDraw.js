@@ -420,20 +420,6 @@ function setBlendMode(additive, useWebGL=glEnable)
     }
 }
 
-/** Combines all LittleJS canvases onto the main canvas and clears them
- *  This is necessary for things like saving a screenshot
- *  @memberof Draw */
-function combineCanvases()
-{
-    ASSERT(1); // todo: fix this to work with new overlay canvas system
-
-    // combine canvases
-    glCopyToContext(mainContext, true);
-
-    // clear canvases
-    glClearCanvas();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 let engineFontImage;
