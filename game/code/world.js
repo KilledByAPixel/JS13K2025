@@ -143,8 +143,7 @@ class World extends EngineObject
                     const layerOffset = lerp(kp,-1.9,1.9) +  
                         +(id||k?random.float(-.1,.1):-.3); // ensure start of island has background
                     const x = lerp(parallaxPercent, centerIslandDistance+layerOffset*sx/2, cameraPos.x);
-                    const y = min(cameraPos.y,8) - max(p*cameraPos.y/2,0);
-                    //xconst y = min(cameraPos.y,8) - p*cameraPos.y/2+2;
+                    const y = min(cameraPos.y,maxHeight/2) - max(p*cameraPos.y/2,0);
                     const textureIndex = random.int(parallaxTextureLayers);
                     const flip = random.sign();
                     const t = textureIndex*parallaxHeight;
@@ -157,7 +156,8 @@ class World extends EngineObject
         {
             // water line
             const backgroundSize = vec2(islandDistance*islandCount*2, 2e3);
-            const pos = vec2(backgroundSize.x/2,min(cameraPos.y,8) - max(cameraPos.y/2,0)-backgroundSize.y/2);
+            const waterLevel =  min(cameraPos.y,maxHeight/2) - max(cameraPos.y/2,0);
+            const pos = vec2(backgroundSize.x/2, waterLevel-backgroundSize.y/2);
             drawRect(pos, backgroundSize, hsl(.5,.8,.7));
             const random = new RandomGenerator(worldSeed);
 
