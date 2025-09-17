@@ -471,8 +471,8 @@ class Player extends EngineObject
         const color3 = this.color3;
         const eyeColor = this.colorEye;
         const topAngle = this.angle;
-        const h = this.isMenuCat ? this.pos.y -this.size.y/2: getGroundHeight(this.pos.x);
-        const n = this.isMenuCat ? vec2(0,1) : getGroundNormal(this.pos.x);
+        const h = this.isMenuCat  || testMakeThumbnail==2? this.pos.y -this.size.y/2: getGroundHeight(this.pos.x);
+        const n = this.isMenuCat  || testMakeThumbnail==2? vec2(0,1) : getGroundNormal(this.pos.x);
         const scale = this.size.y;
         const posScale = this.drawPosScale;
         const OP = (offset, pos=this.pos, angle=topAngle) => pos.add(offset.scale(posScale).rotate(angle));

@@ -378,6 +378,11 @@ function gameUpdate()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdatePost()
 {
+    if (testMakeThumbnail)
+    {
+        canvasMaxSize.x = canvasMaxSize.y = 1e4;
+    }
+    else
     {
         // aspect ratio improvements
         // use whichever side is longer to get full pixel usage
@@ -458,8 +463,10 @@ function updateCamera()
     if (testMakeThumbnail)
     {
         cameraScale = 150;
-        player.pos.x = 10
-        cameraPos = vec2(player.pos.x, player.pos.y+2)
+        cameraPos = vec2(10, 5)
+        player.pos = cameraPos.copy();
+        player.pos.x -= .6;
+        player.pos.y += .1;
         return;
     }
 

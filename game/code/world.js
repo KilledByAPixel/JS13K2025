@@ -25,6 +25,9 @@ class World extends EngineObject
 
     spawnAtmosphere(spawnCount=1)
     {
+        if (testMakeThumbnail)
+            return;
+
         // spawn atmosphere objects in front of camera
         const hasWon = winTimer.isSet();
         for(let i=spawnCount; i--;)
@@ -92,6 +95,8 @@ class World extends EngineObject
                 }
             }
         }
+        if (testMakeThumbnail == 2)
+            return;
         {
             // sun
             const timeOfDay = this.timeOfDay;
@@ -216,6 +221,9 @@ class World extends EngineObject
 
     render()
     {
+        if (testMakeThumbnail == 2)
+            return;
+
         // scenery
         const w = getCameraSize().x/2;
         for(let i=cameraPos.x-w-4|0; i<cameraPos.x+w+4; ++i)

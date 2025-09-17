@@ -69,7 +69,7 @@ function createUI()
     }
 
     pos.x += buttonSize.x + spaceing;
-    uiMenu.addChild(buttonStore = new UIButton(pos, buttonSize, 'Store'));
+    uiMenu.addChild(buttonStore = new UIButton(pos, buttonSize, 'Shop'));
     buttonStore.onClick = ()=> 
     {
         sound_select.play(.5);
@@ -367,7 +367,8 @@ function drawHUD()
         return;
 
     const textSize = .1;
-    if (enhancedMode && !quickStart && !testTitleScreen && !testStore)
+    if (enhancedMode && !quickStart)
+    if (!testMakeThumbnail && !testTitleScreen && !testStore)
     {
         // intro transition, black circle around center
         const p = gameTimer*(titleScreen?.5:1);
@@ -409,7 +410,7 @@ function drawHUD()
     }
 
     if (paused)
-        drawTextShadow(enhancedMode?'-Pawsed-':'Pawsed', vec2(.5, .94), textSize, WHITE);
+        drawTextShadow('-Pawsed-', vec2(.5, .94), textSize, WHITE);
     if (testAutoplay)
         drawTextShadow('AUTOPLAY', vec2(.5, .95), .05, WHITE);
 
@@ -483,7 +484,7 @@ function drawHUD()
 function drawTitleScreen()
 {
     const context = mainContext;
-    const titleScreenTime = testTitleScreen ? 5+gameTimer : gameTimer;
+    const titleScreenTime = testMakeThumbnail || testTitleScreen ? 5+gameTimer : gameTimer;
     const alpha = clamp(titleScreenTime/.5);
     const textSize = .1;
 
@@ -527,9 +528,11 @@ function drawTitleScreen()
         context.lineJoin = 'round';
 
         let totalWidth = 0, measuredWidths = [];
-        const pos = vec2(.5,.2+j*.2).multiply(mainCanvasSize);
-        if (testMakeThumbnail)
-            pos.y += 30
+        let pos = vec2(.5,.2+j*.2).multiply(mainCanvasSize);
+        if (testMakeThumbnail == 1)
+            pos.y += 30;
+        if (testMakeThumbnail == 2)
+            pos = vec2(.25+j*.41,.5).multiply(mainCanvasSize);
         for(let k=2; k--;) // measure the whole row of text first
         for(let i=text.length; i--;)
         {
