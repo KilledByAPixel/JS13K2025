@@ -3,8 +3,8 @@
 let musicEnable = 1;
 
 // sound effects
-const sound_meow = new Sound([.7,.1,900,.05,.1,.1,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
-const sound_meow2 = new Sound([.7,.1,900,.05,.2,.2,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
+const sound_meow = new Sound([.7,.1,600,.05,.1,.1,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
+const sound_meow2 = new Sound([.7,.1,600,.05,.2,.2,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
 const sound_select = new Sound([,.2,900,.01,,.01,2,,18,,500,.01,.01]); // squeek
 const sound_jump = new Sound([.5,,250,.05,,,,2,,-40,,,,5]); // jump
 const sound_boost = new Sound([,,200,.2,.02,.06,1,2,-15,,-99,,.1,,,.2,,.5,.2]); // boost

@@ -44,6 +44,7 @@ a black cat who always brought me good luck.
 
 if (debug)
 {
+    //musicEnable = 0;
     //autoPause=0
     //quickStart = 1;
     //soundEnable = 0;
@@ -60,6 +61,7 @@ if (debug)
     //testStore = 1;
     //testMakeThumbnail=1
     //testGodMode=1;
+    //testStore=1
 }
 
 ///////////////////////////////////////////////////////////////////////////////
