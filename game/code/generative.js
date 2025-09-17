@@ -442,7 +442,7 @@ function getGroundHeight(x)
 
 function getGroundNormal(x)
 {
-    const e = .1;
+    const e = .05;
     const h1 = getGroundHeight(x+e);
     const h2 = getGroundHeight(x-e);
     const slope = (h2 - h1)/e/2;
