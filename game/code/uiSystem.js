@@ -73,14 +73,20 @@ function uiRender()
     mainContext.restore();
 }
 
-function drawUIRect(pos, size, color=uiDefaultColor, lineWidth=uiDefaultLineWidth, lineColor=uiDefaultLineColor, cornerRadius)
+function drawUIRect(pos, size, color=uiDefaultColor, lineWidth=uiDefaultLineWidth, lineColor=uiDefaultLineColor, cornerRadius=0)
 {
     mainContext.fillStyle = color.toString();
     mainContext.beginPath();
-    if (cornerRadius && mainContext['roundRect'])
-        mainContext['roundRect'](pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
+    if (enhancedMode)
+    {
+        // protect incase round rect doesnt exist
+        if (cornerRadius && mainContext['roundRect'])
+            mainContext['roundRect'](pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
+        else
+            mainContext.rect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y);
+    }
     else
-        mainContext.rect(pos.x-size.x/2, pos.y-size.y/2, size.x, size.y);
+        mainContext['roundRect'](pos.x-size.x/2, pos.y-size.y/2, size.x, size.y, cornerRadius);
     mainContext.fill();
 
     if (lineWidth)
