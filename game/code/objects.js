@@ -55,6 +55,23 @@ class Pickup extends WorldObject
         if (pos.distance(player.pos) < 1)
         {
             player.pickup(this.type);
+
+            if (enhancedMode)
+            for(let i=30; i--;)
+            {
+                // create bubble pop particles
+                const angle = rand(9);
+                const colorStart = hsl(.6,1,1,.5)
+                const colorEnd = hsl(.6,1,.5,.5)
+                const lifeTime = rand(.3,.5);
+                const sizeStart = rand(.2,.4);
+                const sizeEnd = 0
+                const pos = this.pos.add(vec2(0,this.height)).add(randInCircle(.5));
+                const p = new SimpleParticle(pos, angle, colorStart, colorEnd, lifeTime, sizeStart, sizeEnd);
+                p.gravityScale = 0;
+                p.velocity = randVector(.1);
+            }
+
             this.destroy();
         }
 
