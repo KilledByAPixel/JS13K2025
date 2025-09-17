@@ -375,22 +375,19 @@ function zzfxG
     pitchJumpTime *= sampleRate;
     repeatTime = repeatTime * sampleRate | 0;
 
-   // const d = Math.max(.01, Math.min(.99, 0.5 + (shapeCurve||0)*.19)); // duty
-
     // generate waveform
     for(length = attack + decay + sustain + release + delay | 0;
         i < length; b[i++] = s * volume)               // sample
     {
         if (!(++c%(bitCrush*100|0)))                   // bit crush
         {
-            s = shape? shape>1? shape>2? shape>3? shape>4?     // wave shape
-                ((t/PI2)%1 < .1+Math.sin(i/199)*.2? 1 : 0)*2-1 :           // 5 pulse (duty d)
-                //((t/PI2)%1 < shapeCurve+Math.sin(i/199)*.3 ? 1 : 0)*2-1 :           // 5 pulse (duty d)
-                Math.sin(t**3) :                       // 4 noise
-                clamp(Math.tan(t),1,-1):               // 3 tan
-                1-(2*t/PI2%2+2)%2:                     // 2 saw
-                1-4*abs(Math.round(t/PI2)-t/PI2):      // 1 triangle
-                Math.sin(t);                           // 0 sin
+            s = shape? shape>1? shape>2? shape>3? shape>4? // wave shape
+                ((t/PI2)%1 < .1+Math.sin(i/199)*.2)*2-1 :  // 5 square pulse (for meow)
+                Math.sin(t**3) :                           // 4 noise
+                clamp(Math.tan(t),1,-1):                   // 3 tan
+                1-(2*t/PI2%2+2)%2:                         // 2 saw
+                1-4*abs(Math.round(t/PI2)-t/PI2):          // 1 triangle
+                Math.sin(t);                               // 0 sin
 
             s = (repeatTime ?
                     1 - tremolo + tremolo*Math.sin(PI2*i/repeatTime) // tremolo
