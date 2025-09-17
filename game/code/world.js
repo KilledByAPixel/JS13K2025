@@ -300,7 +300,7 @@ class World extends EngineObject
 
                 // colored texture
                 colorBandTileInfo.pos.x = island.textureHue;
-                colorBandTileInfo.pos.y = x*island.hueTextureSlide*island.hillWrapCount;
+                colorBandTileInfo.pos.y = x*island.hueTextureSlide;
                 colorBandTileInfo.size.y = generativeTextureSize*island.hillWrapCount;
                 drawColorBandTile(x, h-height/2, sx, sy, colorBandTileInfo);
                 //drawTile(vec2(x,h-e/2), vec2(drawStep+.05,e));
@@ -334,7 +334,7 @@ class World extends EngineObject
         }
         {
             // hills outline
-            const outlineStep = isTouchDevice ? .4 : .2; // less draw calls on mobile
+            const outlineStep = isTouchDevice ? .5 : .2; // less draw calls on mobile
             const width = .2;
             let p = vec2(), s = vec2(width);
             for(let i=xStart/outlineStep|0; i<xEnd/outlineStep; ++i)

@@ -42,8 +42,8 @@ class Island
         this.seed = random.int(1e6);
         this.hue = random.float();
         this.textureHue = ((this.hue*generativeTextureSize|0) || 1) + .5;
-        this.hillWrapCount = random.float(-4,4);
-        this.hueTextureSlide = random.float() < .1 ? 0 : random.floatSign(2,50);
+        this.hillWrapCount = random.float(-9,9);
+        this.hueTextureSlide = random.float() < .2 && abs(this.hillWrapCount) > 4? 0 : random.floatSign(5,99);
         this.sceneryType = random.int(5);
         this.sceneryHue = this.hue + random.floatSign(.1,.2);
 
@@ -118,9 +118,6 @@ function generateWorld()
         const noiseScale = island.noiseScale;
         const noiseRate = island.noiseRate;
         y += noiseScale*noise1D(noisePos + i*noiseRate);
-
-        //y = minGroundHeight+(1- Math.abs(Math.sin(wavePos1 + i*r1/trackResolution)))*2;
-        //y= abs(y+22)-22
 
         // start ramp
         const startArea = 50;
@@ -317,10 +314,10 @@ function generateParallaxTexture()
             {
                 if (bandSize-- < 0)
                 {
-                    bandSize = random.int(3, 20);
+                    bandSize = random.int(3, 15);
                     bandBright = random.float(.7,1);
                     bandHue = bandBaseHue + random.float(-.2,.2);
-                    bandSat = random.float() > .2 ? 0 : random.float();
+                    bandSat = random.float() > .2 ? 0 : random.float(.8);
                 }
 
                 context2.fillStyle = hsl(bandHue,bandSat,bandBright);
