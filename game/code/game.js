@@ -367,16 +367,8 @@ function gameUpdate()
         if (keyWasPressed('KeyV'))
         {
             // capture video
-            if (videoRecorder)
-            {
-                console.log('Video capture stopped');
-                videoCaptureStop();
-            }
-            else
-            {
-                console.log('Video capture started');
-                videoCaptureStart();
-            }
+            debugVideoCaptureIsActive() ? 
+                debugVideoCaptureStop() : debugVideoCaptureStart();
         }
     }
 

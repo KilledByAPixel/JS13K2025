@@ -465,48 +465,49 @@ function debugRender()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// video capture - records video and audio at 60 fps using MediaRecorder API
 
-let videoRecorder, videoRecorderTrack, videoCaptureCanvas;
+let debugVideoCapture, debugVideoCaptureTrack, debugVideoCaptureCanvas, debugVideoCaptureIcon;
 
-function videoCaptureUpdate()
+function debugVideoCaptureIsActive() { return !!debugVideoCapture; }
+
+function debugVideoCaptureUpdate()
 {
-    if (enhancedMode && debug && videoRecorderTrack)
-    {
-        // composite the canvases
-        const context = videoCaptureCanvas.getContext('2d');
-        glCopyToContext(context, true);
-        context.drawImage(mainCanvas, 0, 0);
-        videoRecorderTrack.requestFrame();
-    }
+    if (!enhancedMode || !debug || !debugVideoCapture)
+        return; // not recording
+
+    // composite the canvases
+    const context = debugVideoCaptureCanvas.getContext('2d');
+    glCopyToContext(context, true);
+    context.drawImage(mainCanvas, 0, 0);
+    debugVideoCaptureTrack.requestFrame();
 }
 
-function videoCaptureStart()
+function debugVideoCaptureStart()
 {
-    if (!enhancedMode || videoRecorder)
+    if (!enhancedMode || !debug || debugVideoCapture)
         return; // already recording
 
-    if (!videoCaptureCanvas)
-    {
-        // create compositing canvas
-        videoCaptureCanvas = document.createElement('canvas');
-    }
-
-    videoCaptureCanvas.width = mainCanvas.width;
-    videoCaptureCanvas.height = mainCanvas.height;
+    // setup compositing canvas
+    debugVideoCaptureCanvas ||= document.createElement('canvas');
+    debugVideoCaptureCanvas.width = mainCanvas.width;
+    debugVideoCaptureCanvas.height = mainCanvas.height;
 
     // captureStream passing in 0 to only capture when requestFrame() is called
-    const stream = videoCaptureCanvas.captureStream(0);
+    const stream = debugVideoCaptureCanvas.captureStream(0);
     const chunks = [];
-    videoRecorderTrack = stream.getVideoTracks()[0];
-    videoRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
-    videoRecorder.ondataavailable = e => chunks.push(e.data);
-    videoRecorder.onstop = () =>
+    debugVideoCaptureTrack = stream.getVideoTracks()[0];
+    if (debugVideoCaptureTrack.applyConstraints)
+        debugVideoCaptureTrack.applyConstraints({frameRate: frameRate}); // force 60 fps
+    debugVideoCapture = new MediaRecorder(stream, {mimeType: 'video/webm;codecs=vp8'});
+    debugVideoCapture.ondataavailable = e => chunks.push(e.data);
+    debugVideoCapture.onstop = () =>
     {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
         link.download = 'capture.webm';
+        link.href = url;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -518,14 +519,29 @@ function videoCaptureStart()
         stream.addTrack(track); // add audio track to videos track
 
     // start recording
-    videoRecorder.start();
+    debugVideoCapture.start();
+
+    // show recording icon
+    if (!debugVideoCaptureIcon)
+    {
+        // create once
+        debugVideoCaptureIcon = document.createElement('div');
+        debugVideoCaptureIcon.textContent = '● Recording';
+        debugVideoCaptureIcon.style.position = 'absolute';
+        debugVideoCaptureIcon.style.padding = '9px';
+        debugVideoCaptureIcon.style.color = '#f00';
+        debugVideoCaptureIcon.style.font = '50px monospace';
+        document.body.appendChild(debugVideoCaptureIcon);
+    }
+    debugVideoCaptureIcon.style.display = '';
 }
 
-function videoCaptureStop()
+function debugVideoCaptureStop()
 {
-    if (!enhancedMode || !videoRecorder)
-        return;
+    if (!enhancedMode || !debug || !debugVideoCapture)
+        return; // not recording
 
-    videoRecorder.stop();
-    videoRecorder = 0;
+    debugVideoCapture.stop();
+    debugVideoCapture = 0;
+    debugVideoCaptureIcon.style.display = 'none';
 }
