@@ -56,7 +56,7 @@ class Pickup extends WorldObject
         {
             player.pickup(this.type);
 
-            if (enhancedMode)
+            if (enhancedMode && this.type == 4) // jump bubbles
             for(let i=30; i--;)
             {
                 // create bubble pop particles

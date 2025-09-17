@@ -301,7 +301,7 @@ function generateParallaxTexture()
         const wavePos2 = random.float(1e4);
         const noiseScale = random.float(30,60);
         const noiseRate = random.float(.005,.02);
-        const noisePos = random.float(1e4);
+        const noisePos = random.float(1e4,1e6);
         const bandNoiseRate = random.float(20, 50);
         const textureSlide = random.floatSign(.2,.6);
         const bandBaseHue = random.float();
