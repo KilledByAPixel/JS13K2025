@@ -1,11 +1,5 @@
 {
   "name": "l1ttl3paws",
-  "version": "1",
-  "description": "Cat glider with procedural art and levels for js13k",
-  "author": "Frank Force",
-  "scripts": {
-    "build": "node build.js"
-  },
   "devDependencies": {
     "ect-bin": "~1.4.1",
     "google-closure-compiler": "~20230502.0.0",
