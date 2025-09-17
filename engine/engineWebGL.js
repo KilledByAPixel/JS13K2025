@@ -45,7 +45,10 @@ function glInit()
 
     // create the canvas and textures
     glCanvas = document.createElement('canvas');
-    glContext = glCanvas.getContext('webgl2', {antialias:glAntialias});
+    if (enhancedMode)
+        glContext = glCanvas.getContext('webgl2', {alpha:false, antialias:glAntialias});
+    else
+        glContext = glCanvas.getContext('webgl2', {antialias:glAntialias});
 
     // some browsers are much faster without copying the gl buffer so we just overlay it instead
     const rootElement = mainCanvas.parentElement;
