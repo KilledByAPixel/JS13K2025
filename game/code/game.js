@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.15';
+const gameVersion = '1.16';
 
 debugShowErrors();
 
@@ -437,6 +437,7 @@ function updateCamera()
     //const icb = clamp(player.pos.x*trackResolution,0,track.length-2);
     //const cameraBottom = max((icb%1, track[icb|0].bottom, track[icb+1|0].bottom), player.pos.y - playerSpaceBelow); // limit max zoom
     const minZoom = titleScreen ? .1 : .08; // max zoom in
+    //const oldCameraScale = cameraScale, oldCameraY = cameraPos.y;
     cameraScale = minZoom*mainCanvasSize.y; // zoom
     const s = getCameraSize();
     const playerXOffset = .4;
@@ -447,6 +448,12 @@ function updateCamera()
     cameraPos = vec2(
         player.pos.x + playerXOffset*mainCanvasSize.x/cameraScale - winOffset, 
         getCameraSize().y/2+cameraBottom);
+
+    //const zoomSpeed = .01; // zoom in slower
+    //if (cameraScale > oldCameraScale)
+    //    cameraScale = lerp(zoomSpeed, oldCameraScale, cameraScale);
+    //if (cameraPos.y < oldCameraY)
+    //    cameraPos.y = lerp(zoomSpeed, oldCameraY, cameraPos.y);
 
     if (testMakeThumbnail)
     {
