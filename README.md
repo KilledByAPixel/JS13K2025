@@ -9,6 +9,12 @@ Made by Frank Force for JS13K 2025
 
 *This code is only for learning purposes and not intended to be redistributed!*
 
+## 🐾 How to play
+- Press and hold to gain speed on down slopes
+- Release to gain speed on up slopes
+- Eat pizza to get a boost
+- Collect flowers to buy more cats
+- 
 ## 😺 Features
 - Procedurally generated terrain
 - 13 unlockable cats to play with
@@ -22,12 +28,6 @@ Made by Frank Force for JS13K 2025
 - Saves your coins to use anytime
 - Best times are save if you win without continuing
 - Adaptive screen resolution and aspect
-
-## 🐾 How to play
-- Press and hold to gain speed on down slopes
-- Release to gain speed on up slopes
-- Eat pizza to get a boost
-- Collect flowers to buy more cats
 
 ## 🐈 Controls
 - Mouse or Spacebar = Push Down
