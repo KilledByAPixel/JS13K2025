@@ -1,5 +1,7 @@
 'use strict';
 
+let musicEnable = 1;
+
 // sound effects
 const sound_meow = new Sound([.7,.1,900,.05,.1,.1,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
 const sound_meow2 = new Sound([.7,.1,900,.05,.2,.2,5,,3,-18,,,,.3,,.05,,.7,.05]); // cat
@@ -27,7 +29,7 @@ function musicStart()
 
 function musicUpdate()
 {
-    if (!titleScreen)
+    if (!titleScreen || !musicEnable)
         return;
     if (frame%8)
         return;
