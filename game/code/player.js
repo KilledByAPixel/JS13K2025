@@ -353,7 +353,7 @@ class Player extends EngineObject
         if (spawnParticles)
         {
             // spawn particles
-            for(let i=3; i--;)
+            for(let i=6; i--;)
             {
                 const angle = rand(9);
                 const evilParticles = this.catType == 12;
