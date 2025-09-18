@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.16';
+const gameVersion = '1.17';
 
 debugShowErrors();
 
@@ -275,7 +275,7 @@ function gameUpdate()
                 else
                 {
                     islandTimer.set();
-                    timeLeft = min(timeLeft+25, 30);
+                    timeLeft += 20;
 
                     if (activeIslandID > 0)
                     {
