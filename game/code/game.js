@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.17';
+const gameVersion = '1.19';
 
 debugShowErrors();
 
@@ -176,10 +176,10 @@ function gameUpdate()
     else
     {
         // update game controls
-        if (keyWasPressed('KeyR'))
+        if (keyWasPressed('KeyR') && !gameOverTimer.isSet() && !winTimer.isSet())
         {
             sound_gameOver.play();
-            if (enhancedMode && gameContinued)
+            /*if (enhancedMode && gameContinued)
             {
                 // continue from save
                 worldSeedContinue = saveData.lastSeed;
@@ -187,9 +187,9 @@ function gameUpdate()
                 player.pos.x = saveData.lastIsland * islandDistance-30;
                 player.pos.y = -20;
                 boostIslandID = worldSeedContinue = 0;
-                activeIslandID = saveData.lastIsland+1;
+                activeIslandID = saveData.lastIsland;
             }
-            else
+            else*/
             {
                 // restart
                 gameStart();
