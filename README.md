@@ -26,14 +26,12 @@ Made by Frank Force for JS13K 2025
 - 13 unlockable cats to play with
 - 13 islands in each game mode
 - Mouse, touch, or keyboard controls
-- Parallex background effect
-- Time of day system
+- Parallax background effect
 - Classic Mode is always the same
 - Remix Mode is randomized, beat classic to unlock
-- Continue where you left off
 - Saves your coins to use anytime
-- Best times are save if you win without continuing
-- Adaptive screen resolution and aspect
+- Continue where you left off
+- Tracks best win time without continuing
 
 ## 🦁 Enhanced Mode
 This version has a few extra features not in the js13k build including...
