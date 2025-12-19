@@ -467,21 +467,9 @@ function debugRender()
 ///////////////////////////////////////////////////////////////////////////////
 // video capture - records video and audio at 60 fps using MediaRecorder API
 
-let debugVideoCapture, debugVideoCaptureTrack, debugVideoCaptureCanvas, debugVideoCaptureIcon;
+let debugVideoCapture, debugVideoCaptureTrack, debugVideoCaptureCanvas, debugVideoCaptureIcon, debugVideoCaptureTimer;
 
 function debugVideoCaptureIsActive() { return !!debugVideoCapture; }
-
-function debugVideoCaptureUpdate()
-{
-    if (!enhancedMode || !debug || !debugVideoCapture)
-        return; // not recording
-
-    // composite the canvases
-    const context = debugVideoCaptureCanvas.getContext('2d');
-    glCopyToContext(context, true);
-    context.drawImage(mainCanvas, 0, 0);
-    debugVideoCaptureTrack.requestFrame();
-}
 
 function debugVideoCaptureStart()
 {
@@ -512,27 +500,31 @@ function debugVideoCaptureStart()
         URL.revokeObjectURL(url);
     };
 
-    // connect to audio
-    const audioStreamDestination = audioContext.createMediaStreamDestination();
-    audioGainNode.connect(audioStreamDestination);
-    for (const track of audioStreamDestination.stream.getAudioTracks())
-        stream.addTrack(track); // add audio track to videos track
+    if (audioGainNode)
+    {
+        // connect to audio master gain node
+        const audioStreamDestination = audioContext.createMediaStreamDestination();
+        audioGainNode.connect(audioStreamDestination);
+        for (const track of audioStreamDestination.stream.getAudioTracks())
+            stream.addTrack(track); // add audio tracks to capture stream
+    }
 
     // start recording
     debugVideoCapture.start();
+    debugVideoCaptureTimer = new Timer(0);
 
     // show recording icon
     if (!debugVideoCaptureIcon)
     {
         // create once
         debugVideoCaptureIcon = document.createElement('div');
-        debugVideoCaptureIcon.textContent = '● Recording';
         debugVideoCaptureIcon.style.position = 'absolute';
         debugVideoCaptureIcon.style.padding = '9px';
         debugVideoCaptureIcon.style.color = '#f00';
         debugVideoCaptureIcon.style.font = '50px monospace';
         document.body.appendChild(debugVideoCaptureIcon);
     }
+    debugVideoCaptureIcon.textContent = '';
     debugVideoCaptureIcon.style.display = '';
 }
 
@@ -544,4 +536,17 @@ function debugVideoCaptureStop()
     debugVideoCapture.stop();
     debugVideoCapture = 0;
     debugVideoCaptureIcon.style.display = 'none';
+}
+
+function debugVideoCaptureUpdate()
+{
+    if (!enhancedMode || !debug || !debugVideoCapture)
+        return; // not recording
+
+    // composite the canvases
+    const context = debugVideoCaptureCanvas.getContext('2d');
+    glCopyToContext(context, true);
+    context.drawImage(mainCanvas, 0, 0);
+    debugVideoCaptureTrack.requestFrame();
+    debugVideoCaptureIcon.textContent = '● REC ' + formatTime(debugVideoCaptureTimer);
 }

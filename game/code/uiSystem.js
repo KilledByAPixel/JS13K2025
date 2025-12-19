@@ -27,7 +27,6 @@ const uiNativeHeight = 1080;
 
 function uiUpdate()
 {
-    uiObjectWasClicked = 0; // needed to prevent clickthrough
     function updateInvisible(o)
     {
         // reset input state when not visible
@@ -131,8 +130,6 @@ function isMouseOverlappingUI(posA, sizeA)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-let uiObjectWasClicked; // set to true if any UI object was clicked this frame
-
 class UIObject
 {
     constructor(localPos=vec2(), size=vec2())
@@ -178,7 +175,7 @@ class UIObject
             this.mouseIsOver = isMouseOverlappingUI(this.pos, size);
         }
         if (mousePress && this.mouseIsOver)
-            uiObjectWasClicked = 1; // prevent clicks from passing through UI
+            inputData[0][0] &= ~2; // prevent game input if clicked on ui
         if (this.mouseIsOver && !this.disabled)
         {
             if (mousePress)

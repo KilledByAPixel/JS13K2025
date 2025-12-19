@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.19';
+const gameVersion = '1.20';
 
 debugShowErrors();
 
@@ -414,7 +414,7 @@ function gameUpdatePost()
     // pause/unpause
     if (!titleScreen)
     {
-        if (mouseWasPressed(0) && !uiObjectWasClicked)
+        if (mouseWasPressed(0))
             setPaused(0);
         if (enhancedMode && keyWasPressed('KeyP'))
             setPaused(!paused);

@@ -505,19 +505,19 @@ class Player extends EngineObject
         const bodySprite = this.hasStripes ? spriteAtlas.bodyStriped : spriteAtlas.body;
 
         // far legs
+        const leg3 = OP(vec2(.4,-.2));
+        drawScaleTile(leg3, vec2(1), legSprite, color2, topAngle-this.legsAngle2);
+        const leg4 = OP(vec2(-.2,-.2));
+        drawScaleTile(leg4, vec2(1), legSprite, color2, topAngle+this.legsAngle2);
+
+        // body
+        drawScaleTile(this.pos, vec2(1), bodySprite, color, topAngle);
+
+        // near legs
         const leg1 = OP(vec2(.3,-.3));
         drawScaleTile(leg1, vec2(1), legSprite, color2, topAngle-this.legsAngle);
         const leg2 = OP(vec2(-.3,-.3));
         drawScaleTile(leg2, vec2(1), legSprite, color2, topAngle+this.legsAngle);
-
-        // body
-        drawScaleTile(this.pos, vec2(1), bodySprite, color, topAngle); 
-
-        // near legs
-        const leg3 = OP(vec2(.4,-.3));
-        drawScaleTile(leg3, vec2(1), legSprite, color2, topAngle-this.legsAngle2);
-        const leg4 = OP(vec2(-.2,-.3));
-        drawScaleTile(leg4, vec2(1), legSprite, color2, topAngle+this.legsAngle2);
 
         // head
         const headAngle = topAngle+this.headAngle;

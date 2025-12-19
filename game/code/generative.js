@@ -43,7 +43,7 @@ class Island
         this.hue = random.float();
         this.textureHue = ((this.hue*generativeTextureSize|0) || 1) + .5;
         this.hillWrapCount = random.float(-9,9);
-        this.hueTextureSlide = random.float() < .2 && abs(this.hillWrapCount) > 4? 0 : random.floatSign(5,99);
+        this.hueTextureSlide = random.float() < .2 && abs(this.hillWrapCount) > 3? 0 : random.floatSign(5,99);
         this.sceneryType = random.int(5);
         this.sceneryHue = this.hue + random.floatSign(.1,.2);
 

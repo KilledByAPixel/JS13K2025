@@ -147,6 +147,6 @@ function zipBuildStep(filename)
 {
     console.log(`Zipping...`);
     const args = ['-9', '-strip', '-zip', `../${PROGRAM_NAME}.zip`, 'index.html', ...dataFiles];
-    const ectLocation = '../../node_modules/ect-bin/vendor/win32/ect.exe';
+    const ectLocation = require('ect-bin');
     child_process.spawnSync(ectLocation, args, {stdio: 'inherit', cwd: BUILD_FOLDER});
 };

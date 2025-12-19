@@ -57,9 +57,9 @@ if (debug)
     //testNoRamps=1;
     //testAutoplay=1;
     //testTitleScreen=1
-    //testSeed = 90
+    //testSeed = 8956012
     //testStore = 1;
-    //testMakeThumbnail=1
+    //testMakeThumbnail=2
     //testGodMode=1;
     //testStore=1
 }

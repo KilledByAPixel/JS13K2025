@@ -297,7 +297,7 @@ class World extends EngineObject
         
         {
             // hills background
-            const height = 20; // how tall to draw hills to cover bottom of screen
+            const height = 15; // how tall to draw hills to cover bottom of screen
             const sx = drawStep+.05, sy = height;
             glSetTexture(colorBandTextureInfo.glTexture);
             for(let i=xStart/drawStep|0; i<xEnd/drawStep; ++i)
@@ -324,7 +324,7 @@ class World extends EngineObject
         {
             // hills details
             const pos = vec2(), size = vec2(), color = rgb();
-            const detailCount = isTouchDevice ? 3 : 6; // less draw calls on mobile
+            const detailCount = 6;
             for(let i=xStart/drawStep|0; i<xEnd/drawStep; ++i)
             {
                 const x = i * drawStep;
@@ -342,7 +342,7 @@ class World extends EngineObject
         }
         {
             // hills outline
-            const outlineStep = isTouchDevice ? .5 : .2; // less draw calls on mobile
+            const outlineStep = isTouchDevice ? .4 : .2; // less draw calls on mobile
             const width = .2;
             let p = vec2(), s = vec2(width);
             for(let i=xStart/outlineStep|0; i<xEnd/outlineStep; ++i)
