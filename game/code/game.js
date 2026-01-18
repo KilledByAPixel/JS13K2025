@@ -395,6 +395,7 @@ function gameUpdatePost()
             // full height
             canvasFixedSize.y = min(innerHeight, maxCanvasSize.y);
             canvasFixedSize.x = canvasFixedSize.y * maxAspect | 0;
+
         }
         else if (innerAspect < minAspect)
         {
@@ -406,6 +407,19 @@ function gameUpdatePost()
         {
             // full width and height
             canvasFixedSize.x = 0
+        }
+
+        if (!canvasFixedSize.x)
+        {
+            canvasFixedSize.x = innerWidth;
+            canvasFixedSize.y = innerHeight;
+        }
+
+        if (isTouchDevice)
+        {
+            const scale = 2;
+            canvasFixedSize.x /= scale;
+            canvasFixedSize.y /= scale;
         }
     }
     
