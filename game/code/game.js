@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.20';
+const gameVersion = '1.21';
 
 debugShowErrors();
 
