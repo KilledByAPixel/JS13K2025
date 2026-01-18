@@ -4,7 +4,7 @@
 // littlejs global settings
 
 const gameName = 'L1ttl3 Paws'; // name of the game
-const gameVersion = '1.21';
+const gameVersion = '1.22';
 
 debugShowErrors();
 
@@ -16,6 +16,7 @@ const defaultWorldSeed = 13;
 const winTimeFlyAway = 6;
 
 // game variables
+let lowResMode=0;
 let player;
 let world;
 let islands;
@@ -409,15 +410,19 @@ function gameUpdatePost()
             canvasFixedSize.x = 0
         }
 
-        if (!canvasFixedSize.x)
-        {
-            canvasFixedSize.x = innerWidth;
-            canvasFixedSize.y = innerHeight;
-        }
-
-        if (isTouchDevice)
+        if (lowResMode)
         {
             const scale = 2;
+            const pixelated = 1;
+            if (mainCanvas)
+                mainCanvas.style.imageRendering = pixelated ? 'pixelated' : '';
+            if (glCanvas)
+                glCanvas.style.imageRendering = pixelated ? 'pixelated' : '';
+            if (!canvasFixedSize.x)
+            {
+                canvasFixedSize.x = innerWidth;
+                canvasFixedSize.y = innerHeight;
+            }
             canvasFixedSize.x /= scale;
             canvasFixedSize.y /= scale;
         }
